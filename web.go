@@ -141,6 +141,7 @@ func newHandler() http.Handler {
 	router.HandleFunc("/match_review", MatchReviewHandler).Methods("GET")
 	router.HandleFunc("/match_review/{matchId}/edit", MatchReviewEditGetHandler).Methods("GET")
 	router.HandleFunc("/match_review/{matchId}/edit", MatchReviewEditPostHandler).Methods("POST")
+	router.HandleFunc("/pit_review", PitReviewHandler).Methods("GET")
 	router.HandleFunc("/reports/csv/rankings", RankingsCsvReportHandler).Methods("GET")
 	router.HandleFunc("/reports/pdf/rankings", RankingsPdfReportHandler).Methods("GET")
 	router.HandleFunc("/reports/csv/schedule/{type}", ScheduleCsvReportHandler).Methods("GET")
