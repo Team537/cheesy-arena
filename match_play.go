@@ -69,7 +69,8 @@ func MatchPlayHandler(w http.ResponseWriter, r *http.Request) {
 	if currentMatchType == "" {
 		currentMatchType = "practice"
 	}
-	allowSubstitution := mainArena.currentMatch.Type != "qualification"
+	// allowSubstitution := mainArena.currentMatch.Type != "qualification"
+	allowSubstitution := true
 	matchResult, err := db.GetMatchResultForMatch(mainArena.currentMatch.Id)
 	if err != nil {
 		handleWebErr(w, err)
