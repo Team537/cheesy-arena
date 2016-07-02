@@ -509,7 +509,7 @@ func (arena *Arena) sendDsPacket(auto bool, enabled bool) {
 			allianceStation.DsConn.Enabled = enabled && !allianceStation.EmergencyStop && !allianceStation.Bypass
 			err := allianceStation.DsConn.Update()
 			if err != nil {
-				log.Printf("Unable to send driver station packet for team %d.", allianceStation.team.Id)
+				log.Printf("Unable to send driver station packet for team %d, %s", allianceStation.team.Id, err)
 			}
 		}
 	}
