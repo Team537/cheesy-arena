@@ -271,7 +271,9 @@ func DsIpConfig(socket *net.TCPConn) {
 
         default:
             log.Printf("team %d unknown message id %x recieved len %d", team, pktype, mlen)
-            socket.Read(msg[:mlen-1])
+            if 0 != mlen {
+                socket.Read(msg[:mlen-1])
+            }
         }
     }
     socket.Close()
