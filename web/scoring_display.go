@@ -151,12 +151,22 @@ func (web *Web) scoringDisplayWebsocketHandler(w http.ResponseWriter, r *http.Re
 					(*score).CurrentScore.AutoMobility++
 				}
 			}
+			log.Printf("do Mob %d", (*score).CurrentScore.AutoMobility)
 		case "undoMobility":
 			if !autoCommitted {
 				if (*score).CurrentScore.AutoMobility > 0 {
 					(*score).CurrentScore.AutoMobility--
 				}
 			}
+			log.Printf("undo Mob %d", (*score).CurrentScore.AutoMobility)
+                case "incrementScore":
+                        (*score).CurrentScore.FuelLow++
+			log.Printf("increment Score %d", (*score).CurrentScore.FuelLow)
+                case "decrementScore":
+                        if (*score).CurrentScore.FuelLow > 0 {
+                                (*score).CurrentScore.FuelLow--
+                        }
+			log.Printf("decrement Score %d", (*score).CurrentScore.FuelLow)
 		case "commit":
 			if web.arena.MatchState != field.PreMatch || web.arena.CurrentMatch.Type == "test" {
 				autoCommitted = true

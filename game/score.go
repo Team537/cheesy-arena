@@ -48,10 +48,10 @@ func (score *Score) Summarize(opponentFouls []Foul, matchType string) *ScoreSumm
 	// Calculate teleop score.
 	summary.RotorPoints = 60*score.AutoRotors + 40*score.Rotors
 	summary.TakeoffPoints = 50 * score.Takeoffs
-	summary.PressurePoints = (9*score.AutoFuelHigh + 3*score.AutoFuelLow + 3*score.FuelHigh + score.FuelLow) / 9
+	summary.PressurePoints = score.FuelLow   // (9*score.AutoFuelHigh + 3*score.AutoFuelLow + 3*score.FuelHigh + score.FuelLow) / 9
 
 	// Calculate bonuses.
-	if summary.PressurePoints >= 40 {
+	if summary.PressurePoints >= 1000 {
 		summary.PressureGoalReached = true
 		if matchType == "elimination" {
 			summary.BonusPoints += 20

@@ -11,6 +11,7 @@ var handleScore = function(data) {
   // Update autonomous period values.
   var score = data.Score.CurrentScore;
   $("#autoMobility").text(score.AutoMobility);
+  $("#teamScore").text(score.FuelLow);
 
   // Update component visibility.
   if (!data.AutoCommitted) {
@@ -47,6 +48,12 @@ var handleKeyPress = function(event) {
       break;
     case "a":
       websocket.send("uncommitAuto");
+      break;
+    case "i":
+      websocket.send("incrementScore");
+      break;
+    case "I":
+      websocket.send("decrementScore");
       break;
   }
 };

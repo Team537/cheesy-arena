@@ -623,16 +623,16 @@ func (arena *Arena) handlePlcInput() {
 	oldBlueScore := *blueScore
 
 	// Handle balls.
-	redLow, redHigh, blueLow, blueHigh := arena.Plc.GetBalls()
-	arena.RedRealtimeScore.boiler.UpdateState(redLow, redHigh, matchStartTime, currentTime)
+	// redLow, redHigh, blueLow, blueHigh := arena.Plc.GetBalls()
+	// arena.RedRealtimeScore.boiler.UpdateState(redLow, redHigh, matchStartTime, currentTime)
 	redScore.AutoFuelLow = arena.RedRealtimeScore.boiler.AutoFuelLow
 	redScore.AutoFuelHigh = arena.RedRealtimeScore.boiler.AutoFuelHigh
-	redScore.FuelLow = arena.RedRealtimeScore.boiler.FuelLow
+	// redScore.FuelLow = arena.RedRealtimeScore.boiler.FuelLow
 	redScore.FuelHigh = arena.RedRealtimeScore.boiler.FuelHigh
-	arena.BlueRealtimeScore.boiler.UpdateState(blueLow, blueHigh, matchStartTime, currentTime)
+	// arena.BlueRealtimeScore.boiler.UpdateState(blueLow, blueHigh, matchStartTime, currentTime)
 	blueScore.AutoFuelLow = arena.BlueRealtimeScore.boiler.AutoFuelLow
 	blueScore.AutoFuelHigh = arena.BlueRealtimeScore.boiler.AutoFuelHigh
-	blueScore.FuelLow = arena.BlueRealtimeScore.boiler.FuelLow
+	// blueScore.FuelLow = arena.BlueRealtimeScore.boiler.FuelLow
 	blueScore.FuelHigh = arena.BlueRealtimeScore.boiler.FuelHigh
 
 	// Handle rotors.
