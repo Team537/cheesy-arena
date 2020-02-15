@@ -72,6 +72,8 @@ type Arena struct {
 	MuteMatchSounds            bool
 	matchAborted               bool
 	soundsPlayed               map[*game.MatchSound]struct{}
+        matchColor                 int
+        matchColorSent             bool
 }
 
 type AllianceStation struct {
@@ -81,6 +83,8 @@ type AllianceStation struct {
 	Bypass bool
 	Team   *model.Team
 }
+
+var gameColor = [...]string { "R", "Y", "B", "G" }
 
 // Creates the arena and sets it to its initial state.
 func NewArena(dbPath string) (*Arena, error) {
@@ -266,6 +270,8 @@ func (arena *Arena) StartMatch() error {
 	if err == nil {
 		// Save the match start time and game-specifc data to the database for posterity.
 		arena.CurrentMatch.StartedAt = time.Now()
+		arena.CurrentMatch.GameSpecificData = gameColor[ arena.matchColor % 4 ]
+                arena.matchColor++
 		if arena.CurrentMatch.Type != "test" {
 			arena.Database.SaveMatch(arena.CurrentMatch)
 		}
@@ -380,6 +386,7 @@ func (arena *Arena) Update() {
 		arena.AudienceDisplayModeNotifier.Notify()
 		arena.AllianceStationDisplayMode = "match"
 		arena.AllianceStationDisplayModeNotifier.Notify()
+                arena.sendGameSpecificDataPacket(true)
 		if game.MatchTiming.WarmupDurationSec > 0 {
 			arena.MatchState = WarmupPeriod
 			enabled = false
@@ -389,6 +396,7 @@ func (arena *Arena) Update() {
 			enabled = true
 			sendDsPacket = true
 		}
+                arena.matchColorSent = false
 	case WarmupPeriod:
 		auto = true
 		enabled = false
@@ -401,6 +409,7 @@ func (arena *Arena) Update() {
 	case AutoPeriod:
 		auto = true
 		enabled = true
+                arena.sendGameSpecificDataPacket(true)
 		if matchTimeSec >= float64(game.MatchTiming.WarmupDurationSec+arena.EventSettings.DurationAuto) {
 			auto = false
 			sendDsPacket = true
@@ -425,6 +434,10 @@ func (arena *Arena) Update() {
 	case TeleopPeriod:
 		auto = false
 		enabled = true
+		if !arena.matchColorSent && matchTimeSec >= float64(30 + game.MatchTiming.WarmupDurationSec+arena.EventSettings.DurationAuto) {
+                    arena.sendGameSpecificDataPacket(false)
+                    arena.matchColorSent = true
+                }
 		if matchTimeSec >= float64(game.MatchTiming.WarmupDurationSec+arena.EventSettings.DurationAuto+
 			game.MatchTiming.PauseDurationSec+arena.EventSettings.DurationTeleop) {
 			arena.MatchState = PostMatch
@@ -820,4 +833,21 @@ func (arena *Arena) playSound(name string) {
 func (arena *Arena) alliancePostMatchScoreReady(alliance string) bool {
 	numPanels := arena.ScoringPanelRegistry.GetNumPanels(alliance)
 	return numPanels > 0 && arena.ScoringPanelRegistry.GetNumScoreCommitted(alliance) >= numPanels
+}
+
+func (arena *Arena) sendGameSpecificDataPacket(empty bool) {
+       for _, allianceStation := range arena.AllianceStations {
+               dsConn := allianceStation.DsConn
+               if dsConn != nil {
+                       gdata := ""
+                       if !empty {
+                           gdata = arena.CurrentMatch.GameSpecificData
+                       }
+                       err := dsConn.sendGameSpecificDataPacket(gdata)
+                       if err != nil {
+                               log.Printf("Error sending game-specific data packet to Team %d: %v", dsConn.TeamId, err)
+                       }
+               }
+       }
+       arena.lastDsPacketTime = time.Now()
 }
