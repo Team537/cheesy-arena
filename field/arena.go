@@ -74,6 +74,7 @@ type Arena struct {
 	soundsPlayed               map[*game.MatchSound]struct{}
         matchColor                 int
         matchColorSent             bool
+	matchColorSelect	   string
 }
 
 type AllianceStation struct {
@@ -270,7 +271,7 @@ func (arena *Arena) StartMatch() error {
 	if err == nil {
 		// Save the match start time and game-specifc data to the database for posterity.
 		arena.CurrentMatch.StartedAt = time.Now()
-		arena.CurrentMatch.GameSpecificData = gameColor[ arena.matchColor % 4 ]
+		arena.matchColorSelect = gameColor[ arena.matchColor % 4 ]
                 arena.matchColor++
 		if arena.CurrentMatch.Type != "test" {
 			arena.Database.SaveMatch(arena.CurrentMatch)
@@ -294,6 +295,7 @@ func (arena *Arena) StartMatch() error {
 		}
 
 		arena.MatchState = StartMatch
+		fmt.Printf("can start match\n")
 	}
 	return err
 }
@@ -409,7 +411,7 @@ func (arena *Arena) Update() {
 	case AutoPeriod:
 		auto = true
 		enabled = true
-                arena.sendGameSpecificDataPacket(true)
+                // arena.sendGameSpecificDataPacket(true)
 		if matchTimeSec >= float64(game.MatchTiming.WarmupDurationSec+arena.EventSettings.DurationAuto) {
 			auto = false
 			sendDsPacket = true
@@ -641,10 +643,11 @@ func (arena *Arena) checkCanStartMatch() error {
 
 	err := arena.checkAllianceStationsReady("R1", "R2", "R3", "B1", "B2", "B3")
 	if err != nil {
+		// fmt.Printf("alliances not ready")
 		return err
 	}
 
-	if !arena.BypassPreMatchScore && (!arena.RedRealtimeScore.CurrentScore.IsValidPreMatch() ||
+	if false && !arena.BypassPreMatchScore && (!arena.RedRealtimeScore.CurrentScore.IsValidPreMatch() ||
 		!arena.BlueRealtimeScore.CurrentScore.IsValidPreMatch()) {
 		return fmt.Errorf("Cannot start match until pre-match scoring is set")
 	}
@@ -841,7 +844,7 @@ func (arena *Arena) sendGameSpecificDataPacket(empty bool) {
                if dsConn != nil {
                        gdata := ""
                        if !empty {
-                           gdata = arena.CurrentMatch.GameSpecificData
+                           gdata = arena.matchColorSelect
                        }
                        err := dsConn.sendGameSpecificDataPacket(gdata)
                        if err != nil {

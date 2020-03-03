@@ -37,7 +37,7 @@ type Match struct {
 	StartedAt        time.Time
 	ScoreCommittedAt time.Time
 	Winner           string
-        GameSpecificData string
+	// GameSpecificData string
 }
 
 var ElimRoundNames = map[int]string{1: "F", 2: "SF", 4: "QF", 8: "EF"}

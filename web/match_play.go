@@ -221,6 +221,7 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 			web.arena.MuteMatchSounds = args.MuteMatchSounds
 			err = web.arena.StartMatch()
 			if err != nil {
+				fmt.Printf("%s \n", err.Error())
 				ws.WriteError(err.Error())
 				continue
 			}
