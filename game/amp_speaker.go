@@ -31,9 +31,8 @@ func (ampSpeaker *AmpSpeaker) UpdateState(
 	currentTime time.Time,
 	isPlayoffMatch bool,
 ) {
-	newAmpNotes := ampNoteCount - ampSpeaker.ampNotesScored()
-	newSpeakerNotes := speakerNoteCount - ampSpeaker.speakerNotesScored()
-
+		newAmpNotes := ampNoteCount - ampSpeaker.ampNotesScored()
+		newSpeakerNotes := speakerNoteCount - ampSpeaker.speakerNotesScored()
 	// Handle the autonomous period.
 	autoValidityCutoff := matchStartTime.Add(GetDurationToAutoEnd() + speakerAutoGracePeriodSec*time.Second)
 	if currentTime.Before(autoValidityCutoff) {
@@ -50,7 +49,7 @@ func (ampSpeaker *AmpSpeaker) UpdateState(
 	if currentTime.Before(teleopAmpValidityCutoff) {
 		// Handle incoming Amp notes.
 		ampSpeaker.TeleopAmpNotes += newAmpNotes
-		if !ampSpeaker.isAmplified(currentTime, false) {
+		if !ampSpeaker.IsAmplified(currentTime, false) {
 			ampSpeaker.BankedAmpNotes = min(ampSpeaker.BankedAmpNotes+newAmpNotes, bankedAmpNoteLimit)
 		}
 
@@ -62,7 +61,7 @@ func (ampSpeaker *AmpSpeaker) UpdateState(
 		}
 
 		// Handle the amplify button.
-		if amplifyButton && !ampSpeaker.isAmplified(currentTime, false) && ampSpeaker.BankedAmpNotes >= 2 {
+		if amplifyButton && !ampSpeaker.IsAmplified(currentTime, false) && ampSpeaker.BankedAmpNotes >= 2 {
 			ampSpeaker.LastAmplifiedTime = currentTime
 			ampSpeaker.lastAmplifiedSpeakerNotes = 0
 			ampSpeaker.BankedAmpNotes -= 2
@@ -74,7 +73,7 @@ func (ampSpeaker *AmpSpeaker) UpdateState(
 		GetDurationToTeleopEnd() + SpeakerTeleopGracePeriodSec*time.Second,
 	)
 	if currentTime.Before(teleopSpeakerValidityCutoff) {
-		for newSpeakerNotes > 0 && ampSpeaker.isAmplified(currentTime, true) {
+		for newSpeakerNotes > 0 && ampSpeaker.IsAmplified(currentTime, true) {
 			ampSpeaker.TeleopAmplifiedSpeakerNotes++
 			ampSpeaker.lastAmplifiedSpeakerNotes++
 			newSpeakerNotes--
@@ -85,7 +84,7 @@ func (ampSpeaker *AmpSpeaker) UpdateState(
 
 // Returns the amount of time remaining in the current amplification period, or zero if not currently amplified.
 func (ampSpeaker *AmpSpeaker) AmplifiedTimeRemaining(currentTime time.Time) float64 {
-	if !ampSpeaker.isAmplified(currentTime, false) {
+	if !ampSpeaker.IsAmplified(currentTime, false) {
 		return 0
 	}
 	return float64(AmplificationDurationSec) - currentTime.Sub(ampSpeaker.LastAmplifiedTime).Seconds()
@@ -132,7 +131,7 @@ func (ampSpeaker *AmpSpeaker) speakerNotesScored() int {
 }
 
 // Returns whether the Speaker should be counting new incoming notes as amplified.
-func (ampSpeaker *AmpSpeaker) isAmplified(currentTime time.Time, includeGracePeriod bool) bool {
+func (ampSpeaker *AmpSpeaker) IsAmplified(currentTime time.Time, includeGracePeriod bool) bool {
 	amplifiedValidityCutoff := ampSpeaker.LastAmplifiedTime.Add(time.Duration(AmplificationDurationSec) * time.Second)
 	if includeGracePeriod {
 		amplifiedValidityCutoff = amplifiedValidityCutoff.Add(

@@ -228,6 +228,12 @@ func (web *Web) newHandler() http.Handler {
 	mux.HandleFunc("GET /setup/teams/generate_wpa_keys", web.teamsGenerateWpaKeysHandler)
 	mux.HandleFunc("GET /setup/teams/progress", web.teamsUpdateProgressBarHandler)
 	mux.HandleFunc("GET /setup/teams/refresh", web.teamsRefreshHandler)
+	//Freezy Arena
+	mux.HandleFunc("GET /api/allianceStatus", web.allianceStatusApiHandler)
+	mux.HandleFunc("GET /field_monitor_help", web.fieldMonitorDisplayHelpHandler)
+	mux.HandleFunc("POST /freezy/eStopState", web.eStopStatePostHandler)
+	mux.HandleFunc("GET /field_stack_light", web.fieldStackLightGetHandler)
+	mux.HandleFunc("POST /freezy/startMatch", web.startMatchPostHandler)
 	return mux
 }
 

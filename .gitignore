@@ -29,3 +29,5 @@ _testmain.go
 .DS_Store
 static/logs
 static/img/avatars
+cheesy-arena.exe~
+field/descriptions.csv

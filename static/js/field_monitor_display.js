@@ -152,6 +152,7 @@ var handleMatchTime = function(data) {
   translateMatchTime(data, function(matchState, matchStateText, countdownSec) {
     $("#matchState").text(matchStateText);
     $("#matchTime").text(countdownSec);
+    $("#matchTimeAllianceStation").text(countdownSec);
     if (matchStateText === "PRE-MATCH" | matchStateText === "POST-MATCH") {
       $(".ds-dependent").attr("data-preMatch", "true");
     } else {
@@ -160,16 +161,38 @@ var handleMatchTime = function(data) {
   });
 };
 
+// Handles a websocket message to play a sound to signal match start/stop/etc.
+const handlePlaySound = function(sound) {
+  $("audio").each(function(k, v) {
+    // Stop and reset any sounds that are still playing.
+    v.pause();
+    v.currentTime = 0;
+  });
+  $("#sound-" + sound)[0].play();
+};
+
 // Handles a websocket message to update the match score.
 var handleRealtimeScore = function(data,reversed) {
 
     if (reversed === "true") {
       $("#rightScore").text(data.Red.ScoreSummary.Score);
       $("#leftScore").text(data.Blue.ScoreSummary.Score);
+
+      $("#rightScoreAllianceDisplay").text(data.Blue.ScoreSummary.Score);
+      $("#leftScoreAllianceDisplay").text(data.Red.ScoreSummary.Score);
+      $(`#noteNumerator`).text(data.Blue.ScoreSummary.NumNotes);
+      $(`#noteDenominator`).text(data.Blue.ScoreSummary.NumNotesGoal);
+      $(`#amplifiedTimeRemaining`).text(data.Blue.AmplifiedTimeRemainingSec);
+      
     } else {
       $("#rightScore").text(data.Blue.ScoreSummary.Score);
       $("#leftScore").text(data.Red.ScoreSummary.Score);
 
+      $("#rightScoreAllianceDisplay").text(data.Red.ScoreSummary.Score);
+      $("#leftScoreAllianceDisplay").text(data.Blue.ScoreSummary.Score);
+      $(`#noteNumerator`).text(data.Red.ScoreSummary.NumNotes);
+      $(`#noteDenominator`).text(data.Red.ScoreSummary.NumNotesGoal);
+      $(`#amplifiedTimeRemaining`).text(data.Red.AmplifiedTimeRemainingSec);
     }
 };
 
@@ -204,16 +227,38 @@ var editFtaNotes = function(element) {
 };
 
 $(function() {
-  // Read the configuration for this display from the URL query string.
   var urlParams = new URLSearchParams(window.location.search);
-  var reversed = urlParams.get("reversed");
-  if (reversed === "true") {
+  var reversed = urlParams.get("reversed") === "true"; // Initialize reversed variable
+  updateSides(reversed);
+
+  // Add event listener to Flip button
+  $("#flipButton").click(function() {
+    reversed = !reversed; // Toggle reversed state
+    updateSides(reversed);
+
+    // Update the data-reversed attribute for visual updates
+    $(".reversible-left").attr("data-reversed", reversed);
+    $(".reversible-right").attr("data-reversed", reversed);
+
+    // Optional: Persist state to the URL (if needed)
+    const newUrl = new URL(window.location);
+    newUrl.searchParams.set("reversed", reversed);
+    window.history.replaceState({}, "", newUrl);
+  });
+  
+function updateSides(isReversed) {
+  if (isReversed) {
     redSide = "right";
     blueSide = "left";
   } else {
     redSide = "left";
     blueSide = "right";
   }
+
+  // Update the DOM to reflect the new sides
+  $(".reversible-left").attr("data-reversed", isReversed);
+  $(".reversible-right").attr("data-reversed", isReversed);
+}
 
   //Read if display to be used in a Driver Station, ignore FTA flag if so.
   var driverStation = urlParams.get("ds");
@@ -238,5 +283,6 @@ $(function() {
     matchTiming: function(event) { handleMatchTiming(event.data); },
     matchTime: function(event) { handleMatchTime(event.data); },
     realtimeScore: function(event) { handleRealtimeScore(event.data,reversed); },
+    playSound: function(event) { handlePlaySound(event.data); },
   });
 });

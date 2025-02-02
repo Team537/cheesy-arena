@@ -112,6 +112,12 @@ func TestArenaMatchFlow(t *testing.T) {
 	arena.Update()
 	assert.Equal(t, lastPacketCount+1, arena.AllianceStations["B3"].DsConn.packetCount)
 
+	arena.AllianceStations["A1"].EStop = true
+	arena.AllianceStations["A2"].EStop = true
+	arena.AllianceStations["A3"].EStop = true
+	arena.AllianceStations["B1"].EStop = true
+	arena.AllianceStations["B2"].EStop = true
+	arena.AllianceStations["B3"].EStop = true
 	// Check match start, autonomous and transition to teleop.
 	arena.AllianceStations["R1"].Bypass = true
 	arena.AllianceStations["R2"].Bypass = true

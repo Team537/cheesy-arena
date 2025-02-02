@@ -59,6 +59,38 @@ const handleRealtimeScore = function(data) {
     $(`#stageSide${i}Microphone`).attr("data-value", score.MicrophoneStatuses[i]);
     $(`#stageSide${i}Trap`).attr("data-value", score.TrapStatuses[i]);
   }
+
+  //Some Diagnostis
+  $("#currentScore").text("Current Score: " + realtimeScore.ScoreSummary.Score);
+  $("#currentAmpificationCount").text("Banked Amp Notes: " + score.AmpSpeaker.BankedAmpNotes);
+  $("#ampCount").text("Amp Total Count: " + ( score.AmpSpeaker.TeleopAmpNotes + 
+                                              score.AmpSpeaker.AutoAmpNotes));
+  //$("#teleopAmpCount").text(score.TeleopAmpNotes);
+  //$("#autoAmpCount").text(score.AutoAmpNotes);
+  $("#speakerCount").text("Speaker Total Count: " + ( score.AmpSpeaker.AutoSpeakerNotes + 
+                                                      score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes +
+                                                      score.AmpSpeaker.TeleopAmplifiedSpeakerNotes));
+  //$("#autoSpeakerCount").text(score.AutoSpeakerNotes);
+  //$("#teleopSpeakerCountNotAmplified").text(score.TeleopSpeakerNotesNotAmplified);
+  //$("#teleopSpeakerCountAmplified").text(score.TeleopSpeakerNotesAmplified);
+  //$("#trapCount1").text((score.TrapNotes));
+  //$("#trapCount").text("Trap Count: " + (score.TrapNotes));
+
+  
+  $(`#coopertitionStatus>.value`).text(score.AmpSpeaker.CoopActivated ? "Cooperation Enabled" : "Cooperation");
+  $("#coopertitionStatus").attr("data-value", score.AmpSpeaker.CoopActivated);
+  $(`#amplificationActive>.value`).text(realtimeScore.AmplifiedTimePostWindow ? "Amplification Active" : "Amplification");
+  $("#amplificationActive").attr("data-value", realtimeScore.AmplifiedTimePostWindow);
+  $("#amplificationActive").css("background-color", !(realtimeScore.AmplifiedTimeRemainingSec > 0) && realtimeScore.AmplifiedTimePostWindow? "yellow" : "");
+  $("#amplificationActive").css("color", !(realtimeScore.AmplifiedTimeRemainingSec > 0) && realtimeScore.AmplifiedTimePostWindow  ? "black" : "");
+
+  $("#autoSpeakerNotes").text(score.AmpSpeaker.AutoSpeakerNotes);
+  $("#autoSpeakerNotes").text(score.AmpSpeaker.AutoSpeakerNotes);
+  $("#teleopAmplifiedSpeakerNotes").text(score.AmpSpeaker.TeleopAmplifiedSpeakerNotes);
+  $("#teleopUnamplifiedSpeakerNotes").text(score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes);
+  $("#autoAmpNotes").text(score.AmpSpeaker.AutoAmpNotes);
+  $("#teleopAmpNotes").text(score.AmpSpeaker.TeleopAmpNotes);
+  $("#bankedAmpNotes").text(score.AmpSpeaker.BankedAmpNotes);
 };
 
 // Handles an element click and sends the appropriate websocket message.
@@ -76,6 +108,7 @@ const commitMatchScore = function() {
 $(function() {
   alliance = window.location.href.split("/").slice(-1)[0];
   $("#alliance").attr("data-alliance", alliance);
+  $("#manualScore").attr("data-alliance", alliance);
 
   // Set up the websocket back to the server.
   websocket = new CheesyWebsocket("/panels/scoring/" + alliance + "/websocket", {
@@ -84,3 +117,20 @@ $(function() {
     realtimeScore: function(event) { handleRealtimeScore(event.data); },
   });
 });
+
+// Set initial visibility state
+let bool = true;
+
+// Function to toggle visibility of the panel
+function toggleEstopPanel() {
+    const panel = document.querySelector('.eStops');
+    if (bool) {
+        panel.classList.remove('hidden'); // Hide the panel
+    } else {
+        panel.classList.add('hidden'); // Show the panel
+    }
+    bool = !bool; // Toggle the boolean state
+}
+
+// Attach event listener to the button
+document.getElementById('toggleButton').addEventListener('click', toggleEstopPanel);

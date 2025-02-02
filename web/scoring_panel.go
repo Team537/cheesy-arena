@@ -15,6 +15,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
+
 )
 
 // Renders the scoring interface which enables input of scores in real-time.
@@ -114,40 +116,249 @@ func (web *Web) scoringPanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			}
 
 			switch command {
-			case "leave":
-				if args.TeamPosition >= 1 && args.TeamPosition <= 3 {
-					score.LeaveStatuses[args.TeamPosition-1] = !score.LeaveStatuses[args.TeamPosition-1]
-					scoreChanged = true
-				}
-			case "onStage":
-				if args.TeamPosition >= 1 && args.TeamPosition <= 3 && args.StageIndex >= 0 && args.StageIndex <= 2 {
-					endgameStatus := game.EndgameStatus(args.StageIndex + 2)
-					if score.EndgameStatuses[args.TeamPosition-1] == endgameStatus {
-						score.EndgameStatuses[args.TeamPosition-1] = game.EndgameNone
-					} else {
-						score.EndgameStatuses[args.TeamPosition-1] = endgameStatus
+				case "leave":
+					if args.TeamPosition >= 1 && args.TeamPosition <= 3 {
+						score.LeaveStatuses[args.TeamPosition-1] = !score.LeaveStatuses[args.TeamPosition-1]
+						scoreChanged = true
 					}
-					scoreChanged = true
-				}
-			case "park":
-				if args.TeamPosition >= 1 && args.TeamPosition <= 3 {
-					if score.EndgameStatuses[args.TeamPosition-1] == game.EndgameParked {
-						score.EndgameStatuses[args.TeamPosition-1] = game.EndgameNone
-					} else {
-						score.EndgameStatuses[args.TeamPosition-1] = game.EndgameParked
+				case "onStage":
+					if args.TeamPosition >= 1 && args.TeamPosition <= 3 && args.StageIndex >= 0 && args.StageIndex <= 2 {
+						endgameStatus := game.EndgameStatus(args.StageIndex + 2)
+						if score.EndgameStatuses[args.TeamPosition-1] == endgameStatus {
+							score.EndgameStatuses[args.TeamPosition-1] = game.EndgameNone
+						} else {
+							score.EndgameStatuses[args.TeamPosition-1] = endgameStatus
+						}
+						scoreChanged = true
 					}
+				case "park":
+					if args.TeamPosition >= 1 && args.TeamPosition <= 3 {
+						if score.EndgameStatuses[args.TeamPosition-1] == game.EndgameParked {
+							score.EndgameStatuses[args.TeamPosition-1] = game.EndgameNone
+						} else {
+							score.EndgameStatuses[args.TeamPosition-1] = game.EndgameParked
+						}
+						scoreChanged = true
+					}
+				case "microphone":
+					log.Printf("Microphone Pressed")
+					if args.StageIndex >= 0 && args.StageIndex <= 2 {
+						score.MicrophoneStatuses[args.StageIndex] = !score.MicrophoneStatuses[args.StageIndex]
+						scoreChanged = true
+					}
+				case "trap":
+					if args.StageIndex >= 0 && args.StageIndex <= 2 {
+						score.TrapStatuses[args.StageIndex] = !score.TrapStatuses[args.StageIndex]
+						scoreChanged = true
+					}
+				case "S":
+					var _matchStartTime = web.arena.MatchStartTime
+					var _currentTime = time.Now()
+					score.AmpSpeaker.UpdateState(	score.AmpSpeaker.AutoAmpNotes + 
+													score.AmpSpeaker.TeleopAmpNotes,	
+													
+													score.AmpSpeaker.AutoSpeakerNotes + 
+													score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes +
+													score.AmpSpeaker.TeleopAmplifiedSpeakerNotes	+	1, 
+													
+													false,
+													
+													false, 
+													
+													_matchStartTime,
+													
+													_currentTime,
+													web.arena.CurrentMatch.Type == model.Playoff)
+						log.Printf("Speaker Pressed")
+						scoreChanged = true
+				case "O":
+					score.AmpSpeaker.AutoSpeakerNotes = score.AmpSpeaker.AutoSpeakerNotes+1
+					log.Printf("O Pressed")
 					scoreChanged = true
-				}
-			case "microphone":
-				if args.StageIndex >= 0 && args.StageIndex <= 2 {
-					score.MicrophoneStatuses[args.StageIndex] = !score.MicrophoneStatuses[args.StageIndex]
+				case "o":
+					if score.AmpSpeaker.AutoSpeakerNotes > 0 {
+						score.AmpSpeaker.AutoSpeakerNotes = score.AmpSpeaker.AutoSpeakerNotes-1
+					}
+					log.Printf("o Pressed")
 					scoreChanged = true
-				}
-			case "trap":
-				if args.StageIndex >= 0 && args.StageIndex <= 2 {
-					score.TrapStatuses[args.StageIndex] = !score.TrapStatuses[args.StageIndex]
+				case "P":
+					score.AmpSpeaker.TeleopAmplifiedSpeakerNotes = score.AmpSpeaker.TeleopAmplifiedSpeakerNotes+1
+					log.Printf("P Pressed")
 					scoreChanged = true
-				}
+				case "p":
+					if score.AmpSpeaker.TeleopAmplifiedSpeakerNotes > 0{
+						score.AmpSpeaker.TeleopAmplifiedSpeakerNotes = score.AmpSpeaker.TeleopAmplifiedSpeakerNotes-1
+					}
+					log.Printf("p Pressed")
+					scoreChanged = true
+				case "I":
+					score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes = score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes+1
+					log.Printf("I Pressed")
+					scoreChanged = true
+				case "i":
+					if score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes > 0{
+						score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes = score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes-1
+					}
+					log.Printf("i Pressed")
+					scoreChanged = true
+				case "A":
+					var _matchStartTime = web.arena.MatchStartTime
+					var _currentTime = time.Now()
+					score.AmpSpeaker.UpdateState(	score.AmpSpeaker.AutoAmpNotes + 
+													score.AmpSpeaker.TeleopAmpNotes + 1, 
+													
+													score.AmpSpeaker.AutoSpeakerNotes + 
+													score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes +
+													score.AmpSpeaker.TeleopAmplifiedSpeakerNotes,
+													
+													false,
+														
+													false, 
+													
+													_matchStartTime,
+														
+													_currentTime,
+													web.arena.CurrentMatch.Type == model.Playoff)
+					log.Printf("Amp Pressed")
+					scoreChanged = true
+				case "U":
+					score.AmpSpeaker.AutoAmpNotes = score.AmpSpeaker.AutoAmpNotes+1
+					if score.AmpSpeaker.BankedAmpNotes < 2{
+						score.AmpSpeaker.BankedAmpNotes = score.AmpSpeaker.BankedAmpNotes+1
+					}
+					log.Printf("U Pressed")
+					scoreChanged = true
+				case "u":
+					if score.AmpSpeaker.AutoAmpNotes > 0 {
+						score.AmpSpeaker.AutoAmpNotes = score.AmpSpeaker.AutoAmpNotes-1
+					}
+					log.Printf("u Pressed")
+					scoreChanged = true
+				case "Y":
+					score.AmpSpeaker.TeleopAmpNotes = score.AmpSpeaker.TeleopAmpNotes+1
+					if score.AmpSpeaker.BankedAmpNotes < 2{
+						score.AmpSpeaker.BankedAmpNotes = score.AmpSpeaker.BankedAmpNotes+1
+					}
+					log.Printf("Y Pressed")
+					scoreChanged = true
+				case "y":
+					if score.AmpSpeaker.TeleopAmpNotes > 0 {
+						score.AmpSpeaker.TeleopAmpNotes = score.AmpSpeaker.TeleopAmpNotes-1
+					}
+					log.Printf("y Pressed")
+					scoreChanged = true
+				case "B":
+					if score.AmpSpeaker.BankedAmpNotes < 2{
+						score.AmpSpeaker.BankedAmpNotes = score.AmpSpeaker.BankedAmpNotes+1
+					}
+					log.Printf("B Pressed")
+					scoreChanged = true
+				case "b":
+					if score.AmpSpeaker.BankedAmpNotes > 0 {
+						score.AmpSpeaker.BankedAmpNotes = score.AmpSpeaker.BankedAmpNotes-1
+					}
+					log.Printf("b Pressed")
+					scoreChanged = true
+				case "amplifyButton":
+					var _matchStartTime = web.arena.MatchStartTime
+					var _currentTime = time.Now()
+					score.AmpSpeaker.UpdateState(	score.AmpSpeaker.AutoAmpNotes + 
+													score.AmpSpeaker.TeleopAmpNotes, 
+					
+													score.AmpSpeaker.AutoSpeakerNotes + 
+													score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes +
+													score.AmpSpeaker.TeleopAmplifiedSpeakerNotes,
+													
+													true,
+													
+													false, 
+													
+													_matchStartTime,
+													
+													_currentTime,
+													web.arena.CurrentMatch.Type == model.Playoff)
+					log.Printf("amplifyButton Pressed")
+					scoreChanged = true
+				case "coopButton":
+					var _matchStartTime = web.arena.MatchStartTime
+					var _currentTime = time.Now()
+					score.AmpSpeaker.UpdateState(	score.AmpSpeaker.AutoAmpNotes + 
+													score.AmpSpeaker.TeleopAmpNotes, 
+
+													score.AmpSpeaker.AutoSpeakerNotes + 
+													score.AmpSpeaker.TeleopUnamplifiedSpeakerNotes +
+													score.AmpSpeaker.TeleopAmplifiedSpeakerNotes,
+
+													false,
+														
+													true, 
+														
+													_matchStartTime,
+														
+													_currentTime,
+													web.arena.CurrentMatch.Type == model.Playoff)
+					log.Printf("coopButton Pressed")
+					scoreChanged = true
+				case "E1":
+					if web.arena.EventSettings.AlternateIOEnabled{
+						if alliance == "red"{
+							web.arena.Plc.SetAlternateIOStopState(1,false)
+						}else{
+							web.arena.Plc.SetAlternateIOStopState(7,false)
+						}
+						log.Printf("E1 Pressed")
+						scoreChanged = true
+					}
+				case "A1":
+					if web.arena.EventSettings.AlternateIOEnabled{
+						if alliance == "red"{
+							web.arena.Plc.SetAlternateIOStopState(2,false)
+						}else{
+							web.arena.Plc.SetAlternateIOStopState(8,false)
+						}
+						log.Printf("A1 Pressed")
+						scoreChanged = true
+					}
+				case "E2":
+					if web.arena.EventSettings.AlternateIOEnabled{
+						if alliance == "red"{
+							web.arena.Plc.SetAlternateIOStopState(3,false)
+						}else{
+							web.arena.Plc.SetAlternateIOStopState(9,false)
+						}
+						log.Printf("E2 Pressed")
+						scoreChanged = true
+					}
+				case "A2":
+					if web.arena.EventSettings.AlternateIOEnabled{
+						if alliance == "red"{
+							web.arena.Plc.SetAlternateIOStopState(4,false)
+						}else{
+							web.arena.Plc.SetAlternateIOStopState(10,false)
+						}
+						log.Printf("A2 Pressed")
+						scoreChanged = true
+					}
+				case "E3":
+					if web.arena.EventSettings.AlternateIOEnabled{
+						if alliance == "red"{
+							web.arena.Plc.SetAlternateIOStopState(5,false)
+						}else{
+							web.arena.Plc.SetAlternateIOStopState(11,false)
+						}
+						log.Printf("E3 Pressed")
+						scoreChanged = true
+					}
+				case "A3":
+					if web.arena.EventSettings.AlternateIOEnabled{
+						if alliance == "red"{
+							web.arena.Plc.SetAlternateIOStopState(6,false)
+						}else{
+							web.arena.Plc.SetAlternateIOStopState(12,false)
+						}
+						log.Printf("A3 Pressed")
+						scoreChanged = true
+					}
 			}
 
 			if scoreChanged {

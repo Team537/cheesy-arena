@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"log"
 
 	"github.com/Team254/cheesy-arena/model"
 )
@@ -54,6 +55,15 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		playoffType = model.DoubleEliminationPlayoff
 		numAlliances = 8
+		log.Printf("setup_settings.go playoffType: %v", playoffType)
+		log.Printf("setup_settings.go eventSettings.ElimType: double")
+		numAlliances, _ = strconv.Atoi(r.PostFormValue("numPlayoffAlliances"))
+		log.Printf("setup_settings.go numAlliances: %v", numAlliances)
+		
+		if  numAlliances < 3 || numAlliances > 8 {
+			web.renderSettings(w, r, "Number of alliances For Double Must be between 3 and 8.")
+			return
+		}
 	}
 	if eventSettings.PlayoffType != playoffType || eventSettings.NumPlayoffAlliances != numAlliances {
 		alliances, err := web.arena.Database.GetAllAlliances()
@@ -75,6 +85,7 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	eventSettings.SelectionRound3Order = r.PostFormValue("selectionRound3Order")
 	eventSettings.SelectionShowUnpickedTeams = r.PostFormValue("selectionShowUnpickedTeams") == "on"
 	eventSettings.TbaDownloadEnabled = r.PostFormValue("tbaDownloadEnabled") == "on"
+	eventSettings.AlternateIOEnabled = r.PostFormValue("alternateIOEnabled") == "on"
 	eventSettings.TbaPublishingEnabled = r.PostFormValue("tbaPublishingEnabled") == "on"
 	eventSettings.TbaEventCode = r.PostFormValue("tbaEventCode")
 	eventSettings.TbaSecretId = r.PostFormValue("tbaSecretId")
