@@ -386,6 +386,33 @@ func (web *Web) scheduleCsvReportHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+func (web *Web) scheduleNexusCsvReportHandler(w http.ResponseWriter, r *http.Request) {
+	matchType, err := model.MatchTypeFromString(r.PathValue("type"))
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+
+	matches, err := web.arena.Database.GetMatchesByType(matchType, false)
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+
+	// Don't set the content type as "text/csv", as that will trigger an automatic download in the browser.
+	w.Header().Set("Content-Type", "text/plain")
+	template, err := web.parseFiles("templates/nexus-schedule.csv")
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+	err = template.ExecuteTemplate(w, "nexus-schedule.csv", matches)
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+}
+
 // Generates a PDF-formatted report of the match schedule.
 func (web *Web) schedulePdfReportHandler(w http.ResponseWriter, r *http.Request) {
 	matchType, err := model.MatchTypeFromString(r.PathValue("type"))
