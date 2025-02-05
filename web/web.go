@@ -184,6 +184,7 @@ func (web *Web) newHandler() http.Handler {
 	mux.HandleFunc("GET /reports/csv/fta", web.ftaCsvReportHandler)
 	mux.HandleFunc("GET /reports/csv/rankings", web.rankingsCsvReportHandler)
 	mux.HandleFunc("GET /reports/csv/schedule/{type}", web.scheduleCsvReportHandler)
+	mux.HandleFunc("GET /reports/csv/nexus-schedule/{type}", web.scheduleNexusCsvReportHandler)
 	mux.HandleFunc("GET /reports/csv/teams", web.teamsCsvReportHandler)
 	mux.HandleFunc("GET /reports/csv/wpa_keys", web.wpaKeysCsvReportHandler)
 	mux.HandleFunc("GET /reports/pdf/alliances", web.alliancesPdfReportHandler)
