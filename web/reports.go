@@ -12,7 +12,9 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
@@ -20,6 +22,20 @@ import (
 	"github.com/Team254/cheesy-arena/tournament"
 	"github.com/jung-kurt/gofpdf"
 )
+
+// ExtractNumbersFromString will return just the numbers in the provided string;
+// the returned number-only string will be in the same order it was passed, e.g.
+//
+//	ExtractNumbersFromString("a7b3c04") // => "7304"
+func ExtractNumbersFromString(s string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsDigit(r) {
+			return r
+		}
+
+		return -1
+	}, s)
+}
 
 // Generates a CSV-formatted report of the qualification rankings.
 func (web *Web) rankingsCsvReportHandler(w http.ResponseWriter, r *http.Request) {
@@ -380,6 +396,37 @@ func (web *Web) scheduleCsvReportHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	err = template.ExecuteTemplate(w, "schedule.csv", matches)
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+}
+
+func (web *Web) scheduleNexusCsvReportHandler(w http.ResponseWriter, r *http.Request) {
+	matchType, err := model.MatchTypeFromString(r.PathValue("type"))
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+
+	matches, err := web.arena.Database.GetMatchesByType(matchType, false)
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+
+	for index, match := range matches {
+		matches[index].ShortName = ExtractNumbersFromString(match.ShortName)
+	}
+
+	// Don't set the content type as "text/csv", as that will trigger an automatic download in the browser.
+	w.Header().Set("Content-Type", "text/plain")
+	template, err := web.parseFiles("templates/nexus-schedule.csv")
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+	err = template.ExecuteTemplate(w, "nexus-schedule.csv", matches)
 	if err != nil {
 		handleWebErr(w, err)
 		return
