@@ -12,6 +12,56 @@ import (
 	"time"
 )
 
+func Test_ExtractNumbersFromString(t *testing.T) {
+	type TestCase struct {
+		Input  string
+		Output string
+	}
+
+	cases := []TestCase{
+		{
+			Input:  "P1P2",
+			Output: "12",
+		},
+		{
+			Input:  "P1P32P9PP93",
+			Output: "132993",
+		},
+		{
+			Input:  "1PP2",
+			Output: "12",
+		},
+		{
+			Input:  "1P",
+			Output: "1",
+		},
+		{
+			Input:  "P2",
+			Output: "2",
+		},
+		{
+			Input:  "ASDF",
+			Output: "",
+		},
+		{
+			Input:  "1234",
+			Output: "1234",
+		},
+	}
+
+	for _, c := range cases {
+		actual := ExtractNumbersFromString(c.Input)
+		success := assert.Equal(t, c.Output, actual,
+			"Expected input %q to be extracted %q; was %q",
+			c.Input,
+			c.Output,
+			actual)
+		if !success {
+			return
+		}
+	}
+}
+
 func TestRankingsCsvReport(t *testing.T) {
 	web := setupTestWeb(t)
 
