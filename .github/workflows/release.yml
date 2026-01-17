@@ -39,6 +39,7 @@ jobs:
           echo "MACOS_X64_FILENAME=freezy-arena.${GITHUB_REF:10}.macos.x64.zip" >> $GITHUB_ENV
           echo "MACOS_M1_FILENAME=freezy-arena.${GITHUB_REF:10}.macos.m1.zip" >> $GITHUB_ENV
           echo "WINDOWS_X64_FILENAME=freezy-arena.${GITHUB_REF:10}.windows.x64.zip" >> $GITHUB_ENV
+          echo "ARM64_FILENAME=freezy-arena.${GITHUB_REF:10}.linux.arm64.zip" >> $GITHUB_ENV
 
       - name: Build Linux bundle
         run: |
@@ -93,6 +94,24 @@ jobs:
           asset_path: ./${{ env.MACOS_M1_FILENAME }}
           asset_name: ${{ env.MACOS_M1_FILENAME }}
           asset_content_type: application/zip
+      
+      - name: Build ARM64 bundle
+        run: |
+          rm -rf freezy-arena*
+          mkdir freezy-arena
+          GOOS=darwin GOARCH=arm64 go build -o freezy-arena/
+          cp -r ${{ env.ASSET_FILES }} freezy-arena/
+          zip -r -X ${{ env.ARM64_FILENAME }} freezy-arena
+      
+      - name: Upload ARM641 bundle
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.ARM64_FILENAME }}
+          asset_name: ${{ env.ARM64_FILENAME }}
+          asset_content_type: application/zip
 
       - name: Build Windows bundle
         run: |
@@ -111,3 +130,38 @@ jobs:
           asset_path: ./${{ env.WINDOWS_X64_FILENAME }}
           asset_name: ${{ env.WINDOWS_X64_FILENAME }}
           asset_content_type: application/zip
+  
+  publish_docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      # Required to simulate ARM64 on an x64 runner
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Required for multi-platform builds
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # This is the magic line that fixes the Raspberry Pi issue:
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
