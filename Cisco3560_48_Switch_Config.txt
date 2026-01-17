@@ -256,20 +256,24 @@ interface FastEthernet0/48
  switchport mode access
 !
 interface GigabitEthernet0/1
- switchport access vlan 100
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
 !
 interface GigabitEthernet0/2
- switchport access vlan 100
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
 !
 interface GigabitEthernet0/3
- switchport access vlan 100
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
 !
 interface GigabitEthernet0/4
- switchport access vlan 100
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
 !
 interface Vlan1
  ip address 10.0.0.3 255.255.255.0
