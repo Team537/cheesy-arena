@@ -163,7 +163,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
+          # This is the magic line that fixes the Raspberry Pi issue:
+          platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/${{ steps.lcaseprojectname.outputs.repo }}:latest
             ghcr.io/${{ steps.lcaseprojectname.outputs.repo }}:${{ github.ref_name }}
