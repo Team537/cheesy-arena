@@ -1,19 +1,15 @@
 # --- STAGE 1: Build the binary ---
 FROM golang:1.25-bookworm AS builder
 
-# Install git
-RUN apt-get update && apt-get install -y git
-
 # Set working directory
 WORKDIR /src
 
-# 1. Clone the repository
-RUN git clone https://github.com/knauerhd/cheesy-arena.git
-
-# --- FIX: Change directory to where the code actually lives ---
-WORKDIR /src/cheesy-arena
+# 1. Copy the local source code into the container
+# This copies everything from your current branch/dir into /src
+COPY . .
 
 # 2. Download Go dependencies
+# It finds go.mod in the root automatically
 RUN go mod download
 
 # 3. Build the application statically
@@ -26,12 +22,14 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 
 WORKDIR /app
 
+# Copy the binary from the builder
 COPY --from=builder /app/cheesy-arena /app/cheesy-arena
 
-# --- FIX: Update paths to reflect the subfolder location ---
-COPY --from=builder /src/cheesy-arena/static /app/static
-COPY --from=builder /src/cheesy-arena/templates /app/templates
-COPY --from=builder /src/cheesy-arena/schedules /app/schedules
+# 4. Copy static assets dynamically
+# Since we copied everything to /src in Stage 1, they are right there
+COPY --from=builder /src/static /app/static
+COPY --from=builder /src/templates /app/templates
+COPY --from=builder /src/schedules /app/schedules
 
 RUN chmod +x /app/cheesy-arena
 

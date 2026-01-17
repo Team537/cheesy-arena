@@ -155,13 +155,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Lowercase Project Name
+        id: lcaseprojectname
+        run: |
+          echo "repo=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
           push: true
-          # This is the magic line that fixes the Raspberry Pi issue:
-          platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ steps.lcaseprojectname.outputs.repo }}:latest
+            ghcr.io/${{ steps.lcaseprojectname.outputs.repo }}:${{ github.ref_name }}
