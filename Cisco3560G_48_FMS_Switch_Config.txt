@@ -30,10 +30,12 @@ ip dhcp pool dhcppool
  network 10.0.100.0 255.255.255.0
  domain-name chargerrobotics.org
  dns-server 8.8.8.8 8.8.4.4
- default-router 10.0.100.1
+ default-router 10.0.100.3
  lease 7
 !
 !
+ip route 0.0.0.0 0.0.0.0 10.0.100.1
+ip route 10.0.0.0 255.0.0.0 Null0
 !
 !
 !
@@ -41,7 +43,7 @@ ip dhcp pool dhcppool
 !
 !
 !
-!
+lldp run
 !
 !
 !
@@ -58,25 +60,21 @@ vlan internal allocation policy ascending
 interface GigabitEthernet0/1
  switchport trunk encapsulation dot1q
  switchport trunk native vlan 100
- switchport trunk allowed vlan 10,20,30,100
  switchport mode trunk
 !
 interface GigabitEthernet0/2
  switchport trunk encapsulation dot1q
  switchport trunk native vlan 100
- switchport trunk allowed vlan 10,20,30,100
  switchport mode trunk
 !
 interface GigabitEthernet0/3
  switchport trunk encapsulation dot1q
  switchport trunk native vlan 100
- switchport trunk allowed vlan 40,50,60,100
  switchport mode trunk
 !
 interface GigabitEthernet0/4
  switchport trunk encapsulation dot1q
  switchport trunk native vlan 100
- switchport trunk allowed vlan 40,50,60,100
  switchport mode trunk
 !
 interface GigabitEthernet0/5
@@ -258,50 +256,54 @@ interface GigabitEthernet0/48
  switchport mode access
 !
 interface GigabitEthernet0/49
- switchport access vlan 100
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
 !
 interface GigabitEthernet0/50
- switchport access vlan 100
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
 !
 interface GigabitEthernet0/51
- switchport access vlan 100
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
 !
 interface GigabitEthernet0/52
- switchport access vlan 100
- switchport mode access
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
 !
 interface Vlan1
- ip address 10.0.0.4 255.255.255.0
+ ip address 10.0.0.3 255.255.255.0
 !
 interface Vlan10
  ip address 10.0.1.4 255.255.255.0
- ip access-group 110 in
+ ip access-group DS-FMS in
 !
 interface Vlan20
  ip address 10.0.2.4 255.255.255.0
- ip access-group 120 in
+ ip access-group DS-FMS in
 !
 interface Vlan30
  ip address 10.0.3.4 255.255.255.0
- ip access-group 130 in
+ ip access-group DS-FMS in
 !
 interface Vlan40
  ip address 10.0.4.4 255.255.255.0
- ip access-group 140 in
+ ip access-group DS-FMS in
 !
 interface Vlan50
  ip address 10.0.5.4 255.255.255.0
- ip access-group 150 in
+ ip access-group DS-FMS in
 !
 interface Vlan60
  ip address 10.0.6.4 255.255.255.0
- ip access-group 160 in
+ ip access-group DS-FMS in
 !
 interface Vlan100
- ip address 10.0.100.2 255.255.255.0
+ ip address 10.0.100.3 255.255.255.0
 !
 ip classless
 ip http server
@@ -309,18 +311,13 @@ ip http secure-server
 !
 !
 !
-access-list 110 permit ip 10.0.1.0 0.0.0.255 host 10.0.100.5
-access-list 110 permit udp any eq bootpc any eq bootps
-access-list 120 permit ip 10.0.2.0 0.0.0.255 host 10.0.100.5
-access-list 120 permit udp any eq bootpc any eq bootps
-access-list 130 permit ip 10.0.3.0 0.0.0.255 host 10.0.100.5
-access-list 130 permit udp any eq bootpc any eq bootps
-access-list 140 permit ip 10.0.4.0 0.0.0.255 host 10.0.100.5
-access-list 140 permit udp any eq bootpc any eq bootps
-access-list 150 permit ip 10.0.5.0 0.0.0.255 host 10.0.100.5
-access-list 150 permit udp any eq bootpc any eq bootps
-access-list 160 permit ip 10.0.6.0 0.0.0.255 host 10.0.100.5
-access-list 160 permit udp any eq bootpc any eq bootps
+ip access-list extended DS-FMS
+ permit udp any eq 1145 10.0.100.0 0.0.0.255 eq 1160
+ permit tcp any 10.0.100.0 0.0.0.255 eq 1750
+ permit icmp any 10.0.100.0 0.0.0.255
+ permit icmp any 10.0.0.4 0.255.255.0
+ permit udp any any eq bootpc
+ permit udp any any eq bootps
 !
 snmp-server community 1234Five RO
 !
