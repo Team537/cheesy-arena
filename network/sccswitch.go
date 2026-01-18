@@ -97,26 +97,26 @@ func (scc *SCCSwitch) runCommandSequence(commands []string) (string, error) {
 		Auth: []ssh.AuthMethod{
 			ssh.Password(scc.password),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // Allow any host key for simplicity
 		Timeout:         scc.connectTimeoutDuration,
 		Config: ssh.Config{
 			// Put modern ones first, legacy ones last
 			KeyExchanges: []string{
 				"curve25519-sha256",             // Modern/Secure
 				"diffie-hellman-group14-sha256", // Modern/Standard
-				"diffie-hellman-group1-sha1",    // YOUR OLD SWITCH
+				"diffie-hellman-group1-sha1",    // Legacy CISCO SWITCH
 			},
 			Ciphers: []string{
 				"aes128-gcm@openssh.com", // Modern/Fast
 				"aes128-ctr",             // Modern/Standard
-				"aes128-cbc",             // YOUR OLD SWITCH
+				"aes128-cbc",             // Legacy CISCO SWITCH
 			},
 		},
 	}
 	sshConfig.HostKeyAlgorithms = []string{
 		"ssh-ed25519",
 		"rsa-sha2-256",
-		"ssh-rsa", // YOUR OLD SWITCH
+		"ssh-rsa", // Legacy CISCO SWITCH
 	}
 	client, err := ssh.Dial("tcp", net.JoinHostPort(scc.address, strconv.Itoa(scc.port)), sshConfig)
 	if err != nil {
