@@ -49,13 +49,13 @@ func TestBuildJudgingSchedule(t *testing.T) {
 	scheduleBlocks := []model.ScheduleBlock{
 		{
 			MatchType:       model.Qualification,
-			StartTime:       time.Date(2026, 4, 1, 9, 0, 0, 0, time.UTC),
+			StartTime:       time.Date(2025, 4, 1, 9, 0, 0, 0, time.UTC),
 			NumMatches:      12,
 			MatchSpacingSec: 600,
 		},
 		{
 			MatchType:       model.Qualification,
-			StartTime:       time.Date(2026, 4, 1, 13, 0, 0, 0, time.UTC),
+			StartTime:       time.Date(2025, 4, 1, 13, 0, 0, 0, time.UTC),
 			NumMatches:      12,
 			MatchSpacingSec: 600,
 		},
