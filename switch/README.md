@@ -96,3 +96,12 @@ If you want a copy of the current running configuraiton you can use the followin
 ```text
 ./backup_config.sh <switch_ip> <password>
 ```
+
+
+# SSH
+Due to the age of these switches you need to specify the algorithems and ciphers to use when connecting via SSH as as these Algorithems and Ciphers are no longer supported by modern ssh clients.
+
+Example:
+```text
+ssh -o KexAlgorithms=+diffie-hellman-group1-sha1 -o HostKeyAlgorithms=+ssh-rsa -o Ciphers=+aes128-cbc admin@10.0.100.3
+```
