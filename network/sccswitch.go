@@ -79,13 +79,44 @@ func (scc *SCCSwitch) SetTeamEthernetEnabled(enabled bool) error {
 // Returns the output of the commands or an error if the operation fails.
 func (scc *SCCSwitch) runCommandSequence(commands []string) (string, error) {
 	// Open an SSH connection to the switch.
+	// sshConfig := &ssh.ClientConfig{
+	// 	User: scc.username,
+	// 	Auth: []ssh.AuthMethod{
+	// 		ssh.Password(scc.password),
+	// 	},
+	// 	HostKeyCallback: ssh.InsecureIgnoreHostKey(), // Allow any host key for simplicity
+	// 	Timeout:         scc.connectTimeoutDuration,
+	// }
+	// client, err := ssh.Dial("tcp", net.JoinHostPort(scc.address, strconv.Itoa(scc.port)), sshConfig)
+	// if err != nil {
+	// 	return "", fmt.Errorf("failed to connect to SSH: %w", err)
+	// }
+	// defer client.Close()
 	sshConfig := &ssh.ClientConfig{
 		User: scc.username,
 		Auth: []ssh.AuthMethod{
 			ssh.Password(scc.password),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // Allow any host key for simplicity
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         scc.connectTimeoutDuration,
+		Config: ssh.Config{
+			// Put modern ones first, legacy ones last
+			KeyExchanges: []string{
+				"curve25519-sha256",             // Modern/Secure
+				"diffie-hellman-group14-sha256", // Modern/Standard
+				"diffie-hellman-group1-sha1",    // YOUR OLD SWITCH
+			},
+			Ciphers: []string{
+				"aes128-gcm@openssh.com", // Modern/Fast
+				"aes128-ctr",             // Modern/Standard
+				"aes128-cbc",             // YOUR OLD SWITCH
+			},
+		},
+	}
+	sshConfig.HostKeyAlgorithms = []string{
+		"ssh-ed25519",
+		"rsa-sha2-256",
+		"ssh-rsa", // YOUR OLD SWITCH
 	}
 	client, err := ssh.Dial("tcp", net.JoinHostPort(scc.address, strconv.Itoa(scc.port)), sshConfig)
 	if err != nil {
