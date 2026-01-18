@@ -1,0 +1,231 @@
+!
+version 12.2
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname AllianceSwitch-Blue
+vlan 40,50,60,100
+!
+boot-start-marker
+boot-end-marker
+!
+enable secret 0 <ClearTextPassword>
+!
+!
+!
+no aaa new-model
+system mtu routing 1500
+no ip routing
+ip default-gateway 10.0.100.3
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree portfast default
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+lldp run
+!
+!
+!
+interface FastEthernet0/1
+ description UPLINK_TO_CORE
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
+!
+interface GigabitEthernet0/1
+ description TRUNK_TO_FMS_CORE
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
+!
+interface FastEthernet0/2
+ description DS_STATION_BLUE_1
+ switchport access vlan 40
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet0/2
+ description SPARE_UPLINK
+ switchport access vlan 100
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/3
+ description DS_STATION_BLUE_2
+ switchport access vlan 50
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/4
+ description DS_STATION_BLUE_3
+ switchport access vlan 60
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/5
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/6
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/7
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/8
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/9
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/10
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/11
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/12
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/13
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/14
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/15
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/16
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/17
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/18
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/19
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/20
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/21
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/22
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/23
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface FastEthernet0/24
+ description FMS_INFRASTRUCTURE
+ switchport access vlan 100
+ switchport mode access
+ spanning-tree portfast
+!
+interface Vlan1
+ ip address 10.0.0.4 255.255.255.0
+ no ip route-cache
+ no ip mroute-cache
+ shutdown
+!
+interface Vlan100
+ ip address 10.0.100.11 255.255.255.0
+!
+no ip classless
+no ip http server
+no ip http secure-server
+!
+snmp-server community <ClearTextPassword> RO
+!
+!
+ip domain-name chargerrobotics.org
+!
+username admin privilege 15 secret <ClearTextPassword>
+!
+crypto key generate rsa general-keys modulus 2048
+!
+line con 0
+ exec-timeout 0 0
+line vty 0 4
+ login local
+ transport input ssh
+line vty 5 15
+ password <ClearTextPassword>
+ login
+ transport input telnet
+!
+service password-encryption
+!
+ip ssh version 2
+!
+end
