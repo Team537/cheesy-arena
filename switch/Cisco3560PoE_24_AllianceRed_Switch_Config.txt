@@ -36,23 +36,11 @@ lldp run
 !
 !
 !
-interface FastEthernet0/1
- description UPLINK_TO_CORE
- switchport trunk encapsulation dot1q
- switchport trunk native vlan 100
- switchport mode trunk
-!
 interface GigabitEthernet0/1
  description TRUNK_TO_FMS_CORE
  switchport trunk encapsulation dot1q
  switchport trunk native vlan 100
  switchport mode trunk
-!
-interface FastEthernet0/2
- description DS_STATION_RED_1
- switchport access vlan 10
- switchport mode access
- spanning-tree portfast
 !
 interface GigabitEthernet0/2
  description SPARE_UPLINK
@@ -60,137 +48,173 @@ interface GigabitEthernet0/2
  switchport mode access
  shutdown
 !
+interface FastEthernet0/1
+ description UPLINK_TO_CORE
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 100
+ switchport mode trunk
+ power inline never
+!
+interface FastEthernet0/2
+ description DS_STATION_RED_1
+ switchport access vlan 10
+ switchport mode access
+ spanning-tree portfast
+ power inline never
+!
 interface FastEthernet0/3
  description DS_STATION_RED_2
  switchport access vlan 20
  switchport mode access
  spanning-tree portfast
+ power inline never
 !
 interface FastEthernet0/4
  description DS_STATION_RED_3
  switchport access vlan 30
  switchport mode access
  spanning-tree portfast
+ power inline never
 !
 interface FastEthernet0/5
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/6
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/7
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/8
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/9
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/10
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/11
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/12
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/13
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/14
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/15
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/16
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/17
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/18
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/19
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/20
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/21
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/22
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/23
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface FastEthernet0/24
  description FMS_INFRASTRUCTURE
  switchport access vlan 100
  switchport mode access
  spanning-tree portfast
+ power inline auto
 !
 interface Vlan1
  ip address 10.0.0.4 255.255.255.0
