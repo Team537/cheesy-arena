@@ -1,0 +1,4 @@
+ip dhcp pool dhcppool
+default-router 10.0.100.4
+dns-server 10.0.100.4
+exit
