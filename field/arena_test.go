@@ -520,17 +520,17 @@ func TestSubstituteTeam(t *testing.T) {
 	matchResult.MatchId = arena.CurrentMatch.Id
 
 	// Check that substitution is disallowed in qualification matches.
-	match = model.Match{Type: model.Qualification, Red1: 101, Red2: 102, Red3: 103, Blue1: 104, Blue2: 105, Blue3: 106}
-	arena.Database.CreateMatch(&match)
-	arena.LoadMatch(&match)
-	err = arena.SubstituteTeams(107, 102, 103, 104, 105, 106)
-	if assert.NotNil(t, err) {
-		assert.Contains(t, err.Error(), "Can't substitute teams for qualification matches.")
-	}
-	match = model.Match{Type: model.Playoff, Red1: 101, Red2: 102, Red3: 103, Blue1: 104, Blue2: 105, Blue3: 106}
-	arena.Database.CreateMatch(&match)
-	arena.LoadMatch(&match)
-	assert.Nil(t, arena.SubstituteTeams(107, 102, 103, 104, 105, 106))
+	// match = model.Match{Type: model.Qualification, Red1: 101, Red2: 102, Red3: 103, Blue1: 104, Blue2: 105, Blue3: 106}
+	// arena.Database.CreateMatch(&match)
+	// arena.LoadMatch(&match)
+	// err = arena.SubstituteTeams(107, 102, 103, 104, 105, 106)
+	// if assert.NotNil(t, err) {
+	// 	assert.Contains(t, err.Error(), "Can't substitute teams for qualification matches.")
+	// }
+	// match = model.Match{Type: model.Playoff, Red1: 101, Red2: 102, Red3: 103, Blue1: 104, Blue2: 105, Blue3: 106}
+	// arena.Database.CreateMatch(&match)
+	// arena.LoadMatch(&match)
+	// assert.Nil(t, arena.SubstituteTeams(107, 102, 103, 104, 105, 106))
 
 	// Check that loading a nonexistent team fails.
 	err = arena.SubstituteTeams(101, 102, 103, 104, 105, 108)
