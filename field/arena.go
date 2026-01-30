@@ -373,9 +373,9 @@ func (arena *Arena) LoadNextMatch(startScheduledBreak bool) error {
 
 // Assigns the given team to the given station, also substituting it into the match record.
 func (arena *Arena) SubstituteTeams(red1, red2, red3, blue1, blue2, blue3 int) error {
-	if !arena.CurrentMatch.ShouldAllowSubstitution() {
-		return fmt.Errorf("Can't substitute teams for qualification matches.")
-	}
+	// if !arena.CurrentMatch.ShouldAllowSubstitution() {
+	// 	return fmt.Errorf("Can't substitute teams for qualification matches.")
+	// }
 
 	if err := arena.validateTeams(red1, red2, red3, blue1, blue2, blue3); err != nil {
 		return err

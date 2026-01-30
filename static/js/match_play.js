@@ -332,12 +332,12 @@ const handleMatchLoad = function (data) {
   $.each(data.Teams, function (station, team) {
     const teamId = $(`#status${station} .team-number`);
     teamId.val(team ? team.Id : "");
-    teamId.prop("disabled", !data.AllowSubstitution);
+    teamId.prop("disabled", false);
   });
   $("#playoffRedAllianceInfo").html(formatPlayoffAllianceInfo(data.Match.PlayoffRedAlliance, data.RedOffFieldTeams));
   $("#playoffBlueAllianceInfo").html(formatPlayoffAllianceInfo(data.Match.PlayoffBlueAlliance, data.BlueOffFieldTeams));
 
-  $("#substituteTeams").prop("disabled", true);
+  // $("#substituteTeams").prop("disabled", true);
   $("#showOverlay").prop("disabled", false);
   $("#introRadio").prop("disabled", false);
   $("#muteMatchSounds").prop("checked", false);
