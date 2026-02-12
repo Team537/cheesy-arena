@@ -166,7 +166,7 @@ const handleMatchTime = function (data) {
     $("#matchState").text(matchStateText);
     $("#matchTime").text(countdownSec);
     $("#matchTimeAllianceStation").text(countdownSec);
-    if (matchStateText === "PRE-MATCH" | matchStateText === "POST-MATCH") {
+    if (matchStateText === "PRE-MATCH" || matchStateText === "POST-MATCH") {
       $(".ds-dependent").attr("data-preMatch", "true");
     } else {
       $(".ds-dependent").attr("data-preMatch", "false");
