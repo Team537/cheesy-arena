@@ -7,7 +7,7 @@ UI for configuring event settings.
 {{define "title"}}Settings{{end}}
 {{define "body"}}
 <div class="row justify-content-center">
-  {{if .ErrorMessage}}
+  {{if .ErrorMessage}}`
   <div class="alert alert-danger alert-dismissible">
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     {{.ErrorMessage}}
@@ -205,50 +205,33 @@ UI for configuring event settings.
                 </div>
               </div>
               <div class="row mb-3">
-                <label class="col-lg-6 control-label">Pause Duration<br/>(seconds)</label>
+                <label class="col-lg-6 control-label">Transition Duration<br/>(seconds)</label>
                 <div class="col-lg-6">
-                  <input type="text" class="form-control" name="pauseDurationSec" value="{{.PauseDurationSec}}">
+                  <input type="text" class="form-control" name="transitionShiftDurationSec" value="{{.TransitionShiftDurationSec}}">
                 </div>
               </div>
               <div class="row mb-3">
-                <label class="col-lg-6 control-label">Teleoperated Period Duration<br/>(seconds)</label>
+                <label class="col-lg-6 control-label">Aliance Shift Period Duration<br/>(seconds)</label>
                 <div class="col-lg-6">
-                  <input type="text" class="form-control" name="teleopDurationSec" value="{{.TeleopDurationSec}}">
+                  <input type="text" class="form-control" name="allianceShiftDurationSec" value="{{.AllianceShiftDurationSec}}">
                 </div>
               </div>
               <div class="row mb-3">
-                <label class="col-lg-6 control-label">Warning Remaining Duration<br/>(seconds)</label>
+                <label class="col-lg-6 control-label">End Game Remaining Duration<br/>(seconds)</label>
                 <div class="col-lg-6">
-                  <input type="text" class="form-control" name="warningRemainingDurationSec"
-                    value="{{.WarningRemainingDurationSec}}">
+                  <input type="text" class="form-control" name="endGameDurationSec"
+                    value="{{.EndGameDurationSec}}">
                 </div>
               </div>
               <div class="row mb-3">
-                <label class="col-lg-6 control-label">Auto Bonus RP Coral Threshold</label>
+                <label class="col-lg-6 control-label">First Shift Alliance</label>
                 <div class="col-lg-6">
-                  <input type="text" class="form-control" id="autoBonusCoralThreshold" name="autoBonusCoralThreshold"
-                    value="{{.AutoBonusCoralThreshold}}">
-                </div>
-              </div>
-              <div class="row mb-3">
-                <label class="col-lg-6 control-label">Coopertition Bonus Enabled</label>
-                <div class="col-lg-1 checkbox">
-                  <input type="checkbox" id="coralBonusCoopEnabled"
-                    name="coralBonusCoopEnabled" {{if .CoralBonusCoopEnabled}} checked{{end}}>
-                </div>
-              </div>
-              <div class="row mb-3">
-                <label class="col-lg-6 control-label">Coral Bonus RP Per-Level Threshold</label>
-                <div class="col-lg-6">
-                  <input type="text" class="form-control" id="coralBonusPerLevelThreshold"
-                    name="coralBonusPerLevelThreshold" value="{{.CoralBonusPerLevelThreshold}}">
-                </div>
-              </div>
-              <div class="row">
-                <label class="col-lg-6 control-label">Barge Bonus RP Point Threshold</label>
-                <div class="col-lg-6">
-                  <input type="text" class="form-control" id="bargeBonusPointThreshold" name="bargeBonusPointThreshold"
-                    value="{{.BargeBonusPointThreshold}}">
+                  <select class="form-control" name="firstShiftAlliance">
+                    <option value="blue"{{if eq .FirstShiftAlliance "blue"}} selected{{end}}>Blue</option>
+                    <option value="red"{{if eq .FirstShiftAlliance "red"}} selected{{end}}>Red</option>
+                    <option value="random"{{if eq .FirstShiftAlliance "random"}} selected{{end}}>Random</option>
+                    <option value="lowestScore"{{if eq .FirstShiftAlliance "lowestScore"}} selected{{end}}>Lowest Score</option>
+                  </select>
                 </div>
               </div>
             </fieldset>
@@ -391,6 +374,18 @@ UI for configuring event settings.
                 <label class="col-lg-6 control-label">Blue Alliance IO Address</label>
                 <div class="col-lg-6">
                   <input type="text" class="form-control" name="BlueAllianceStationEstopAddress" value="{{.BlueAllianceStationEstopAddress}}">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-6 control-label">Red Hub IO Address</label>
+                <div class="col-lg-6">
+                  <input type="text" class="form-control" name="RedHubAddress" value="{{.RedHubAddress}}">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-6 control-label">Blue Hub IO Address</label>
+                <div class="col-lg-6">
+                  <input type="text" class="form-control" name="BlueHubAddress" value="{{.BlueHubAddress}}">
                 </div>
               </div>
             </fieldset>

@@ -165,7 +165,6 @@ const handleMatchTime = function (data) {
   translateMatchTime(data, function (matchState, matchStateText, countdownSec) {
     $("#matchState").text(matchStateText);
     $("#matchTime").text(countdownSec);
-    $("#matchTimeAllianceStation").text(countdownSec);
     if (matchStateText === "PRE-MATCH" || matchStateText === "POST-MATCH") {
       $(".ds-dependent").attr("data-preMatch", "true");
     } else {
@@ -186,14 +185,11 @@ const handlePlaySound = function(sound) {
 
 
 // Handles a websocket message to update the match score.
-var handleRealtimeScore = function(data) {
-  var urlParams = new URLSearchParams(window.location.search);
-  var reversed = urlParams.get("reversed");
-  let redCoral, blueCoral;
-  /*  if (currentMatch.Type === matchTypePlayoff) { */
-  if (false) {
-    redCoral = "1";//data.Red.ScoreSummary.NumCoral;
-    blueCoral = "2";//data.Blue.ScoreSummary.NumCoral;
+const handleRealtimeScore = function (data, reversed) {
+
+  if (reversed === "true") {
+    $("#rightScore").text(data.Red.ScoreSummary.Score);
+    $("#leftScore").text(data.Blue.ScoreSummary.Score);
   } else {
     redCoral = `${data.Red.ScoreSummary.NumCoralLevels}/${data.Red.ScoreSummary.NumCoralLevelsGoal}`;
     blueCoral = `${data.Blue.ScoreSummary.NumCoralLevels}/${data.Blue.ScoreSummary.NumCoralLevelsGoal}`;
@@ -262,41 +258,14 @@ const editFtaNotes = function (element) {
 
 $(function () {
   // Read the configuration for this display from the URL query string.
-  var urlParams = new URLSearchParams(window.location.search);
-  var reversed = urlParams.get("reversed") === "true"; // Initialize reversed variable
-  var isds = urlParams.get("ds"); 
-  updateSides(reversed);
-
-  // Add event listener to Flip button
-  $(".left-position, .right-position").click(function() {
-    if (isds === "true") {
-      return;
-    }
-    reversed = !reversed; // Toggle reversed state
-    updateSides(reversed);
-
-    // Update the data-reversed attribute for visual updates
-    $(".reversible-left").attr("data-reversed", reversed);
-    $(".reversible-right").attr("data-reversed", reversed);
-
-    // Optional: Persist state to the URL (if needed)
-    const newUrl = new URL(window.location);
-    newUrl.searchParams.set("reversed", reversed);
-    window.history.replaceState({}, "", newUrl);
-  });
-  
-  function updateSides(isReversed) {
-    if (isReversed) {
-      redSide = "right";
-      blueSide = "left";
-    } else {
-      redSide = "left";
-      blueSide = "right";
-    }
-
-    // Update the DOM to reflect the new sides
-    $(".reversible-left").attr("data-reversed", isReversed);
-    $(".reversible-right").attr("data-reversed", isReversed);
+  const urlParams = new URLSearchParams(window.location.search);
+  const reversed = urlParams.get("reversed");
+  if (reversed === "true") {
+    redSide = "right";
+    blueSide = "left";
+  } else {
+    redSide = "left";
+    blueSide = "right";
   }
 
   //Read if display to be used in a Driver Station, ignore FTA flag if so.

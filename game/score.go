@@ -8,19 +8,15 @@ package game
 type Score struct {
 	RobotsBypassed  [3]bool
 	LeaveStatuses   [3]bool
-	Reef            Reef
-	BargeAlgae      int
-	ProcessorAlgae  int
+	Fuel            int
 	EndgameStatuses [3]EndgameStatus
 	Fouls           []Foul
 	PlayoffDq       bool
 }
 
 // Game-specific settings that can be changed via the settings.
-var AutoBonusCoralThreshold = 1
-var CoralBonusPerLevelThreshold = 7
-var CoralBonusCoopEnabled = true
 var BargeBonusPointThreshold = 16
+var IncludeAlgaeInBargeBonus = false
 
 // Represents the state of a robot at the end of the match.
 type EndgameStatus int
@@ -47,13 +43,11 @@ func (score *Score) Summarize(opponentScore *Score) *ScoreSummary {
 			summary.LeavePoints += 3
 		}
 	}
-	autoCoralPoints := score.Reef.AutoCoralPoints()
-	summary.AutoPoints = summary.LeavePoints + autoCoralPoints
+	summary.AutoPoints = summary.LeavePoints
 
-	summary.NumCoral = score.Reef.AutoCoralCount() + score.Reef.TeleopCoralCount()
-	summary.CoralPoints = autoCoralPoints + score.Reef.TeleopCoralPoints()
-	summary.NumAlgae = score.BargeAlgae + score.ProcessorAlgae
-	summary.AlgaePoints = 4*score.BargeAlgae + 6*score.ProcessorAlgae
+	// Calculate fuel points (1 points each).
+	summary.FuelCount = score.Fuel
+	summary.FuelPoints = 1 * score.Fuel
 
 	// Calculate endgame points.
 	for _, status := range score.EndgameStatuses {
@@ -68,7 +62,7 @@ func (score *Score) Summarize(opponentScore *Score) *ScoreSummary {
 		}
 	}
 
-	summary.MatchPoints = summary.LeavePoints + summary.CoralPoints + summary.AlgaePoints + summary.BargePoints
+	summary.MatchPoints = summary.LeavePoints + summary.FuelPoints + summary.BargePoints
 
 	// Calculate penalty points.
 	for _, foul := range opponentScore.Fouls {
@@ -83,8 +77,6 @@ func (score *Score) Summarize(opponentScore *Score) *ScoreSummary {
 			// Check for the opponent fouls that automatically trigger a ranking point.
 			if rule.IsRankingPoint {
 				switch rule.RuleNumber {
-				case "G410":
-					summary.CoralBonusRankingPoint = true
 				case "G418":
 					summary.BargeBonusRankingPoint = true
 				case "G428":
@@ -105,33 +97,22 @@ func (score *Score) Summarize(opponentScore *Score) *ScoreSummary {
 			break
 		}
 	}
-	if allRobotsLeft && score.Reef.isAutoBonusCoralThresholdMet() {
+	if allRobotsLeft {
 		summary.AutoBonusRankingPoint = true
 	}
 
-	// Coral bonus ranking point.
-	summary.NumCoralLevels = score.Reef.countCoralBonusSatisfiedLevels()
-	summary.NumCoralLevelsGoal = 4
-	if CoralBonusCoopEnabled {
-		summary.CoopertitionCriteriaMet = score.ProcessorAlgae >= 2
-		summary.CoopertitionBonus = summary.CoopertitionCriteriaMet && opponentScore.ProcessorAlgae >= 2
-		if summary.CoopertitionBonus {
-			summary.NumCoralLevelsGoal = 3
-		}
-	}
-	if summary.NumCoralLevels >= summary.NumCoralLevelsGoal {
-		summary.CoralBonusRankingPoint = true
-	}
-
 	// Barge bonus ranking point.
-	if summary.BargePoints >= BargeBonusPointThreshold {
+	bargePointsForBonus := summary.BargePoints
+	if IncludeAlgaeInBargeBonus {
+		bargePointsForBonus += summary.FuelPoints
+	}
+	if bargePointsForBonus >= BargeBonusPointThreshold {
 		summary.BargeBonusRankingPoint = true
 	}
 
 	// Check for G206 violation.
 	for _, foul := range score.Fouls {
 		if foul.Rule() != nil && foul.Rule().RuleNumber == "G206" {
-			summary.CoralBonusRankingPoint = false
 			summary.BargeBonusRankingPoint = false
 			break
 		}
@@ -139,9 +120,6 @@ func (score *Score) Summarize(opponentScore *Score) *ScoreSummary {
 
 	// Add up the bonus ranking points.
 	if summary.AutoBonusRankingPoint {
-		summary.BonusRankingPoints++
-	}
-	if summary.CoralBonusRankingPoint {
 		summary.BonusRankingPoints++
 	}
 	if summary.BargeBonusRankingPoint {
@@ -155,9 +133,7 @@ func (score *Score) Summarize(opponentScore *Score) *ScoreSummary {
 func (score *Score) Equals(other *Score) bool {
 	if score.RobotsBypassed != other.RobotsBypassed ||
 		score.LeaveStatuses != other.LeaveStatuses ||
-		score.Reef != other.Reef ||
-		score.BargeAlgae != other.BargeAlgae ||
-		score.ProcessorAlgae != other.ProcessorAlgae ||
+		score.Fuel != other.Fuel ||
 		score.EndgameStatuses != other.EndgameStatuses ||
 		score.PlayoffDq != other.PlayoffDq ||
 		len(score.Fouls) != len(other.Fouls) {

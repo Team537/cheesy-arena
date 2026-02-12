@@ -71,6 +71,8 @@ type EventSettings struct {
 	ScoreTableEstopAddress          string
 	RedAllianceStationEstopAddress  string
 	BlueAllianceStationEstopAddress string
+	RedHubAddress                   string
+	BlueHubAddress                  string
 	AdminPassword                   string
 	TeamSignRed1Id                  int
 	TeamSignRed2Id                  int
@@ -84,14 +86,13 @@ type EventSettings struct {
 	BlackmagicAddresses             string
 	WarmupDurationSec               int
 	AutoDurationSec                 int
-	PauseDurationSec                int
-	TeleopDurationSec               int
-	WarningRemainingDurationSec     int
-	AutoBonusCoralThreshold         int
-	CoralBonusPerLevelThreshold     int
-	CoralBonusCoopEnabled           bool
-	BargeBonusPointThreshold        int
+	TransitionShiftDurationSec      int
+	AllianceShiftDurationSec        int
+	EndGameDurationSec              int
+	FirstShiftAlliance       string
+	BargeBonusPointThreshold int
 	FlashDSEnabled                  bool
+	IncludeAlgaeInBargeBonus        bool
 }
 
 func (database *Database) GetEventSettings() (*EventSettings, error) {
@@ -119,13 +120,12 @@ func (database *Database) GetEventSettings() (*EventSettings, error) {
 		SCCDownCommands:             strings.Join(sccDefaultDownCommands, "\n"),
 		WarmupDurationSec:           game.MatchTiming.WarmupDurationSec,
 		AutoDurationSec:             game.MatchTiming.AutoDurationSec,
-		PauseDurationSec:            game.MatchTiming.PauseDurationSec,
-		TeleopDurationSec:           game.MatchTiming.TeleopDurationSec,
-		WarningRemainingDurationSec: game.MatchTiming.WarningRemainingDurationSec,
-		AutoBonusCoralThreshold:     game.AutoBonusCoralThreshold,
-		CoralBonusPerLevelThreshold: game.CoralBonusPerLevelThreshold,
-		CoralBonusCoopEnabled:       game.CoralBonusCoopEnabled,
-		BargeBonusPointThreshold:    game.BargeBonusPointThreshold,
+		TransitionShiftDurationSec:  game.MatchTiming.TransitionShiftDurationSec,
+		AllianceShiftDurationSec:    game.MatchTiming.AllianceShiftDurationSec,
+		EndGameDurationSec:          game.MatchTiming.EndGameDurationSec,
+		FirstShiftAlliance:       "blue",
+		BargeBonusPointThreshold: game.BargeBonusPointThreshold,
+		IncludeAlgaeInBargeBonus:    game.IncludeAlgaeInBargeBonus,
 	}
 
 	if err := database.eventSettingsTable.create(&eventSettings); err != nil {
