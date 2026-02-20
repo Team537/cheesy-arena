@@ -205,6 +205,12 @@ UI for configuring event settings.
                 </div>
               </div>
               <div class="row mb-3">
+                <label class="col-lg-6 control-label">Pause Duration<br/>(seconds)</label>
+                <div class="col-lg-6">
+                  <input type="text" class="form-control" name="pauseDurationSec" value="{{.PauseDurationSec}}">
+                </div>
+              </div>
+              <div class="row mb-3">
                 <label class="col-lg-6 control-label">Transition Duration<br/>(seconds)</label>
                 <div class="col-lg-6">
                   <input type="text" class="form-control" name="transitionShiftDurationSec" value="{{.TransitionShiftDurationSec}}">
@@ -386,6 +392,15 @@ UI for configuring event settings.
                 <label class="col-lg-6 control-label">Blue Hub IO Address</label>
                 <div class="col-lg-6">
                   <input type="text" class="form-control" name="BlueHubAddress" value="{{.BlueHubAddress}}">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-8 control-label">
+                  Enable ESP32 API Monitor (Byron Robotics Stack Light Controller)
+                </label>
+                <div class="col-lg-1 checkbox">
+                  <input type="checkbox" id="apiMonitorEnabled"
+                    name="apiMonitorEnabled"{{if .ApiMonitorEnabled}} checked{{end}}>
                 </div>
               </div>
             </fieldset>

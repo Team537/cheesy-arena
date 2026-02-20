@@ -117,6 +117,7 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	eventSettings.BlackmagicAddresses = r.PostFormValue("blackmagicAddresses")
 	eventSettings.WarmupDurationSec, _ = strconv.Atoi(r.PostFormValue("warmupDurationSec"))
 	eventSettings.AutoDurationSec, _ = strconv.Atoi(r.PostFormValue("autoDurationSec"))
+	eventSettings.PauseDurationSec, _ = strconv.Atoi(r.PostFormValue("pauseDurationSec"))
 
 	eventSettings.TransitionShiftDurationSec, _ = strconv.Atoi(r.PostFormValue("transitionShiftDurationSec"))
 	eventSettings.AllianceShiftDurationSec, _ = strconv.Atoi(r.PostFormValue("allianceShiftDurationSec"))
@@ -126,6 +127,7 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	eventSettings.IncludeAlgaeInBargeBonus = r.PostFormValue("includeAlgaeInBargeBonus") == "on"
 
 	eventSettings.AlternateIOEnabled = r.PostFormValue("alternateIOEnabled") == "on"
+	eventSettings.ApiMonitorEnabled = r.PostFormValue("apiMonitorEnabled") == "on"
 	eventSettings.ScoreTableEstopAddress = r.PostFormValue("ScoreTableEstopAddress")
 	eventSettings.RedAllianceStationEstopAddress = r.PostFormValue("RedAllianceStationEstopAddress")
 	eventSettings.BlueAllianceStationEstopAddress = r.PostFormValue("BlueAllianceStationEstopAddress")

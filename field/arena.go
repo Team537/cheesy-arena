@@ -224,12 +224,14 @@ func (arena *Arena) LoadSettings() error {
 	arena.Esp32.SetBlueAllianceStationEstopAddress(settings.BlueAllianceStationEstopAddress)
 	arena.Esp32.SetRedAllianceHubAddress(settings.RedHubAddress)
 	arena.Esp32.SetBlueAllianceHubAddress(settings.BlueHubAddress)
+	arena.Esp32.SetApiMonitorEnabled(settings.ApiMonitorEnabled)
 	arena.TbaClient = partner.NewTbaClient(settings.TbaEventCode, settings.TbaSecretId, settings.TbaSecret)
 	arena.NexusClient = partner.NewNexusClient(settings.TbaEventCode)
 	arena.BlackmagicClient = partner.NewBlackmagicClient(settings.BlackmagicAddresses)
 
 	game.MatchTiming.WarmupDurationSec = settings.WarmupDurationSec
 	game.MatchTiming.AutoDurationSec = settings.AutoDurationSec
+	game.MatchTiming.PauseDurationSec = settings.PauseDurationSec
 	game.MatchTiming.TransitionShiftDurationSec = settings.TransitionShiftDurationSec
 	game.MatchTiming.AllianceShiftDurationSec = settings.AllianceShiftDurationSec
 	game.MatchTiming.EndGameDurationSec = settings.EndGameDurationSec
@@ -600,6 +602,8 @@ func (arena *Arena) Update() {
 		arena.AllianceStationDisplayMode = "match"
 		arena.AllianceStationDisplayModeNotifier.Notify()
 		arena.HubsActive = 0
+		arena.RedRealtimeScore.CurrentScore.Hubstate = false
+		arena.BlueRealtimeScore.CurrentScore.Hubstate = false
 		go arena.BlackmagicClient.StartRecording()
 		if game.MatchTiming.WarmupDurationSec > 0 {
 			arena.MatchState = WarmupPeriod
@@ -764,6 +768,9 @@ func (arena *Arena) Update() {
 	arena.LastMatchTimeSec = matchTimeSec
 	arena.lastMatchState = arena.MatchState
 
+	arena.RedRealtimeScore.CurrentScore.Hubstate = arena.HubsActive == 1
+	arena.BlueRealtimeScore.CurrentScore.Hubstate = arena.HubsActive == 2
+	arena.RealtimeScoreNotifier.Notify()
 }
 
 // Loops indefinitely to track and update the arena components.
