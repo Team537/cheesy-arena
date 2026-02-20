@@ -424,9 +424,9 @@ func (web *Web) teamHubStatusPostHandler(w http.ResponseWriter, r *http.Request)
 		// Add fuel to the appropriate alliance's score if allowed
 		if canAcceptFuel {
 			if isRed {
-				web.arena.RedRealtimeScore.CurrentScore.Fuel += payload.FuelCount
+				web.arena.RedRealtimeScore.CurrentScore.ActiveFuel += payload.FuelCount
 			} else {
-				web.arena.BlueRealtimeScore.CurrentScore.Fuel += payload.FuelCount
+				web.arena.BlueRealtimeScore.CurrentScore.ActiveFuel += payload.FuelCount
 			}
 			web.arena.RealtimeScoreNotifier.Notify()
 		}
@@ -481,7 +481,7 @@ func (web *Web) incrementElementPostHandler(w http.ResponseWriter, r *http.Reque
     // Increment the requested element counter. Add cases as needed.
     switch p.Element {
     case "Fuel":
-        scorePtr.CurrentScore.Fuel++
+        scorePtr.CurrentScore.ActiveFuel++
         web.arena.RealtimeScoreNotifier.Notify()
         return
     default:

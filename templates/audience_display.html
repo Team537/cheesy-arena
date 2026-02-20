@@ -35,11 +35,22 @@ Display shown on the audience screen overlayed over the video.
                 <img class="avatar" id="leftTeam2Avatar" src=""/>
                 <img class="avatar" id="leftTeam3Avatar" src=""/>
               </div>
+              <div class="score-fields">
+                <div class="score-field">
+                  <div class="hub-indicator" id="leftHubIndicator"></div>
+                  <div id="leftFuel" class="rp-progress"></div>
+                </div>
+              </div>
               <div class="score-number" id="leftScoreNumber"></div>
             </div>
             <div class="score score-right reversible-right">
               <div class="score-number" id="rightScoreNumber"></div>
-              
+              <div class="score-fields">
+                <div class="score-field">
+                  <div id="rightFuel" class="rp-progress"></div>
+                  <div class="hub-indicator" id="rightHubIndicator"></div>
+                </div>
+              </div>
               <div class="avatars">
                 <img class="avatar" id="rightTeam1Avatar" src=""/>
                 <img class="avatar" id="rightTeam2Avatar" src=""/>
@@ -121,10 +132,15 @@ Display shown on the audience screen overlayed over the video.
               </div>
             </div>
             <div class="final-breakdown" id="leftFinalBreakdown">
-              
+              <div id="leftFinalAutoFuelPoints"></div>
+              <div id="leftFinalAutoClimbPoints"></div>
+              <div id="leftFinalActiveFuelPoints"></div>
+              <div id="leftFinalTeleopClimbPoints"></div>
               <div id="leftFinalFoulPoints"></div>
               <div class="playoff-hidden-field">
-                
+                <div id="leftFinalEnergizedRankingPoint"></div>
+                <div id="leftFinalSuperchargedRankingPoint"></div>
+                <div id="leftFinalTraversalRankingPoint"></div>
                 <div id="leftFinalRankingPoints"></div>
               </div>
               <div class="playoff-only-field">
@@ -133,10 +149,15 @@ Display shown on the audience screen overlayed over the video.
               </div>
             </div>
             <div class="final-breakdown" id="centerFinalBreakdown">
-              
+              <div>Auto FUEL</div>
+              <div>Auto Climb</div>
+              <div>Active FUEL</div>
+              <div>Teleop Climb (TOWER)</div>
               <div>Foul</div>
               <div class="playoff-hidden-field">
-                
+                <div>ENERGIZED RP</div>
+                <div>SUPERCHARGED RP</div>
+                <div>TRAVERSAL RP</div>
                 <div>Ranking Points</div>
               </div>
               <div class="playoff-only-field">
@@ -145,10 +166,15 @@ Display shown on the audience screen overlayed over the video.
               </div>
             </div>
             <div class="final-breakdown" id="rightFinalBreakdown">
-              
+              <div id="rightFinalAutoFuelPoints"></div>
+              <div id="rightFinalAutoClimbPoints"></div>
+              <div id="rightFinalActiveFuelPoints"></div>
+              <div id="rightFinalTeleopClimbPoints"></div>
               <div id="rightFinalFoulPoints"></div>
               <div class="playoff-hidden-field">
-                
+                <div id="rightFinalEnergizedRankingPoint"></div>
+                <div id="rightFinalSuperchargedRankingPoint"></div>
+                <div id="rightFinalTraversalRankingPoint"></div>
                 <div id="rightFinalRankingPoints"></div>
               </div>
               <div class="playoff-only-field">

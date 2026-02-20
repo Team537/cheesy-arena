@@ -204,24 +204,35 @@ func generateInMatchTeamRearText(arena *Arena, isRed bool, countdown string) str
 		formatString = "B%03d-R%03d"
 	}
 	scoreSummary := realtimeScore.CurrentScore.Summarize(&opponentRealtimeScore.CurrentScore)
-	scoreTotal := scoreSummary.Score - scoreSummary.BargePoints
+	scoreTotal := scoreSummary.Score
 	opponentScoreSummary := opponentRealtimeScore.CurrentScore.Summarize(&realtimeScore.CurrentScore)
-	opponentScoreTotal := opponentScoreSummary.Score - opponentScoreSummary.BargePoints
+	opponentScoreTotal := opponentScoreSummary.Score
 	allianceScores := fmt.Sprintf(formatString, scoreTotal, opponentScoreTotal)
 
-	return fmt.Sprintf("%s %s", countdown, allianceScores)
+	// TODO: Add REBUILT-specific ranking point progress display
+	var rankingPointProgress string
+	if arena.CurrentMatch.Type != model.Playoff {
+		rankingPointProgress = fmt.Sprintf("%d", scoreSummary.TotalFuel)
+	}
+
+	return fmt.Sprintf("%s %s %s", countdown, allianceScores, rankingPointProgress)
 }
 
 // Returns the in-match rear text for the timer display for the given alliance.
 func generateInMatchTimerRearText(arena *Arena, isRed bool) string {
-	var realtimeScore *RealtimeScore
+	// TODO: Add REBUILT-specific rear text display (e.g., ball counts, shift info)
+	var score *game.Score
 	if isRed {
-		realtimeScore = arena.RedRealtimeScore
+		score = &arena.RedRealtimeScore.CurrentScore
 	} else {
-		realtimeScore = arena.BlueRealtimeScore
+		score = &arena.BlueRealtimeScore.CurrentScore
 	}
 
-	return fmt.Sprintf("Fuel: %d", realtimeScore.CurrentScore.Fuel)
+	return fmt.Sprintf(
+		"A:%02d T:%03d",
+		score.ActiveFuel,
+		score.ActiveFuel+score.InactiveFuel,
+	)
 }
 
 // Returns the front text, front color, and rear text to display on the timer display.

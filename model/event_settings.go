@@ -67,8 +67,9 @@ type EventSettings struct {
 	SCCUpCommands                   string
 	SCCDownCommands                 string
 	PlcAddress                      string
+	DMXAddress                      string
 	AlternateIOEnabled              bool
-	ApiMonitorEnabled              bool
+	ApiMonitorEnabled               bool
 	ScoreTableEstopAddress          string
 	RedAllianceStationEstopAddress  string
 	BlueAllianceStationEstopAddress string
@@ -85,6 +86,35 @@ type EventSettings struct {
 	TeamSignBlueTimerId             int
 	UseLiteUdpPort                  bool
 	BlackmagicAddresses             string
+	CompanionAddress                 string
+	CompanionPort                    int
+	CompanionMatchPreviewPage        int
+	CompanionMatchPreviewRow         int
+	CompanionMatchPreviewColumn      int
+	CompanionSetAudiencePage         int
+	CompanionSetAudienceRow          int
+	CompanionSetAudienceColumn       int
+	CompanionMatchStartPage          int
+	CompanionMatchStartRow           int
+	CompanionMatchStartColumn        int
+	CompanionTeleopStartPage         int
+	CompanionTeleopStartRow          int
+	CompanionTeleopStartColumn       int
+	CompanionEndgameStartPage        int
+	CompanionEndgameStartRow         int
+	CompanionEndgameStartColumn      int
+	CompanionMatchEndPage            int
+	CompanionMatchEndRow             int
+	CompanionMatchEndColumn          int
+	CompanionPostResultPage          int
+	CompanionPostResultRow           int
+	CompanionPostResultColumn        int
+	CompanionAllianceSelectionPage   int
+	CompanionAllianceSelectionRow    int
+	CompanionAllianceSelectionColumn int
+	CompanionMatchAbortPage          int
+	CompanionMatchAbortRow           int
+	CompanionMatchAbortColumn        int
 	WarmupDurationSec               int
 	AutoDurationSec                 int
 	PauseDurationSec                int
@@ -94,7 +124,11 @@ type EventSettings struct {
 	FirstShiftAlliance       string
 	BargeBonusPointThreshold int
 	FlashDSEnabled                  bool
-	IncludeAlgaeInBargeBonus        bool
+	TeleopDurationSec               int
+	WarningRemainingDurationSec     int
+	EnergizedRPThreshold            int
+	SuperchargedRPThreshold         int
+	TraversalRPThreshold            int
 }
 
 func (database *Database) GetEventSettings() (*EventSettings, error) {
@@ -124,12 +158,16 @@ func (database *Database) GetEventSettings() (*EventSettings, error) {
 		WarmupDurationSec:           game.MatchTiming.WarmupDurationSec,
 		AutoDurationSec:             game.MatchTiming.AutoDurationSec,
 		PauseDurationSec:            game.MatchTiming.PauseDurationSec,
+		TeleopDurationSec:           game.MatchTiming.AllianceShiftDurationSec,
 		TransitionShiftDurationSec:  game.MatchTiming.TransitionShiftDurationSec,
 		AllianceShiftDurationSec:    game.MatchTiming.AllianceShiftDurationSec,
 		EndGameDurationSec:          game.MatchTiming.EndGameDurationSec,
 		FirstShiftAlliance:       "blue",
-		BargeBonusPointThreshold: game.BargeBonusPointThreshold,
-		IncludeAlgaeInBargeBonus:    game.IncludeAlgaeInBargeBonus,
+		WarningRemainingDurationSec: game.MatchTiming.TransitionShiftDurationSec,
+		EnergizedRPThreshold:        game.EnergizedRPThreshold,
+		SuperchargedRPThreshold:     game.SuperchargedRPThreshold,
+		TraversalRPThreshold:        game.TraversalRPThreshold,
+		DMXAddress:                  "10.0.100.80",
 	}
 
 	if err := database.eventSettingsTable.create(&eventSettings); err != nil {

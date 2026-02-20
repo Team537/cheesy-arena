@@ -104,6 +104,7 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	eventSettings.SCCUpCommands = r.PostFormValue("sccUpCommands")
 	eventSettings.SCCDownCommands = r.PostFormValue("sccDownCommands")
 	eventSettings.PlcAddress = r.PostFormValue("plcAddress")
+	eventSettings.DMXAddress = r.PostFormValue("dmxAddress")
 	eventSettings.AdminPassword = r.PostFormValue("adminPassword")
 	eventSettings.TeamSignRed1Id, _ = strconv.Atoi(r.PostFormValue("teamSignRed1Id"))
 	eventSettings.TeamSignRed2Id, _ = strconv.Atoi(r.PostFormValue("teamSignRed2Id"))
@@ -118,13 +119,15 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	eventSettings.WarmupDurationSec, _ = strconv.Atoi(r.PostFormValue("warmupDurationSec"))
 	eventSettings.AutoDurationSec, _ = strconv.Atoi(r.PostFormValue("autoDurationSec"))
 	eventSettings.PauseDurationSec, _ = strconv.Atoi(r.PostFormValue("pauseDurationSec"))
-
 	eventSettings.TransitionShiftDurationSec, _ = strconv.Atoi(r.PostFormValue("transitionShiftDurationSec"))
 	eventSettings.AllianceShiftDurationSec, _ = strconv.Atoi(r.PostFormValue("allianceShiftDurationSec"))
 	eventSettings.EndGameDurationSec, _ = strconv.Atoi(r.PostFormValue("endGameDurationSec"))
 	eventSettings.FirstShiftAlliance = r.PostFormValue("firstShiftAlliance")
-	eventSettings.BargeBonusPointThreshold, _ = strconv.Atoi(r.PostFormValue("bargeBonusPointThreshold"))
-	eventSettings.IncludeAlgaeInBargeBonus = r.PostFormValue("includeAlgaeInBargeBonus") == "on"
+	eventSettings.TeleopDurationSec, _ = strconv.Atoi(r.PostFormValue("teleopDurationSec"))
+	eventSettings.WarningRemainingDurationSec, _ = strconv.Atoi(r.PostFormValue("warningRemainingDurationSec"))
+	eventSettings.EnergizedRPThreshold, _ = strconv.Atoi(r.PostFormValue("energizedRPThreshold"))
+	eventSettings.SuperchargedRPThreshold, _ = strconv.Atoi(r.PostFormValue("superchargedRPThreshold"))
+	eventSettings.TraversalRPThreshold, _ = strconv.Atoi(r.PostFormValue("traversalRPThreshold"))
 
 	eventSettings.AlternateIOEnabled = r.PostFormValue("alternateIOEnabled") == "on"
 	eventSettings.ApiMonitorEnabled = r.PostFormValue("apiMonitorEnabled") == "on"

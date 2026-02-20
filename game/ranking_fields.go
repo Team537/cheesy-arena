@@ -11,7 +11,8 @@ type RankingFields struct {
 	RankingPoints     int
 	MatchPoints       int
 	AutoPoints        int
-	BargePoints       int
+	EndgamePoints     int
+	ActiveBalls       int
 	Random            float64
 	Wins              int
 	Losses            int
@@ -56,7 +57,8 @@ func (fields *RankingFields) AddScoreSummary(ownScore *ScoreSummary, opponentSco
 	// Assign tiebreaker points.
 	fields.MatchPoints += ownScore.MatchPoints
 	fields.AutoPoints += ownScore.AutoPoints
-	fields.BargePoints += ownScore.BargePoints
+	fields.EndgamePoints += ownScore.AutoClimbPoints + ownScore.TeleopClimbPoints
+	fields.ActiveBalls += ownScore.ActiveFuel
 }
 
 // Helper function to implement the required interface for Sort.
@@ -73,10 +75,13 @@ func (rankings Rankings) Less(i, j int) bool {
 	if a.RankingPoints*b.Played == b.RankingPoints*a.Played {
 		if a.MatchPoints*b.Played == b.MatchPoints*a.Played {
 			if a.AutoPoints*b.Played == b.AutoPoints*a.Played {
-				if a.BargePoints*b.Played == b.BargePoints*a.Played {
-					return a.Random > b.Random
+				if a.EndgamePoints*b.Played == b.EndgamePoints*a.Played {
+					if a.ActiveBalls*b.Played == b.ActiveBalls*a.Played {
+						return a.Random > b.Random
+					}
+					return a.ActiveBalls*b.Played > b.ActiveBalls*a.Played
 				}
-				return a.BargePoints*b.Played > b.BargePoints*a.Played
+				return a.EndgamePoints*b.Played > b.EndgamePoints*a.Played
 			}
 			return a.AutoPoints*b.Played > b.AutoPoints*a.Played
 		}

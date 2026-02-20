@@ -81,7 +81,7 @@ func (web *Web) scoringPanelHandler(w http.ResponseWriter, r *http.Request) {
 	position := r.PathValue("position")
 	parameters, ok := positionParameters[position]
 	if !ok {
-		handleWebErr(w, fmt.Errorf("Invalid positionn '%s'.", position))
+		handleWebErr(w, fmt.Errorf("Invalid position '%s'.", position))
 		return
 	}
 
@@ -167,7 +167,7 @@ func (web *Web) scoringPanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			}
 			web.arena.ScoringPanelRegistry.SetScoreCommitted(position, ws)
 			web.arena.ScoringStatusNotifier.Notify()
-		} else if command == "endgame" {
+		} else if command == "endgame" || command == "autoClimb" || command == "teleopClimb" {
 			args := struct {
 				TeamPosition  int
 				EndgameStatus int
@@ -180,22 +180,17 @@ func (web *Web) scoringPanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 
 			if args.TeamPosition >= 1 && args.TeamPosition <= 3 && args.EndgameStatus >= 0 && args.EndgameStatus <= 3 {
 				endgameStatus := game.EndgameStatus(args.EndgameStatus)
-				score.EndgameStatuses[args.TeamPosition-1] = endgameStatus
-				scoreChanged = true
-			}
-		} else if command == "leave" {
-			args := struct {
-				TeamPosition int
-			}{}
-			err = mapstructure.Decode(data, &args)
-			if err != nil {
-				ws.WriteError(err.Error())
-				continue
-			}
-
-			if args.TeamPosition >= 1 && args.TeamPosition <= 3 {
-				score.LeaveStatuses[args.TeamPosition-1] = !score.LeaveStatuses[args.TeamPosition-1]
-				scoreChanged = true
+				if command == "autoClimb" {
+					// Auto climb only allows Level 1 or None
+					if endgameStatus == game.EndgameNone || endgameStatus == game.EndgameLevel1 {
+						score.AutoClimbStatuses[args.TeamPosition-1] = endgameStatus
+						scoreChanged = true
+					}
+				} else {
+					// Default to teleop climb for "endgame" and "teleopClimb" commands
+					score.TeleopClimbStatuses[args.TeamPosition-1] = endgameStatus
+					scoreChanged = true
+				}
 			}
 		} else if command == "addFoul" {
 			args := struct {
@@ -209,7 +204,8 @@ func (web *Web) scoringPanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			}
 
 			// Add the foul to the correct alliance's list.
-			foul := game.Foul{IsMajor: args.IsMajor}
+			foul := game.Foul{FoulId: web.arena.NextFoulId, IsMajor: args.IsMajor}
+			web.arena.NextFoulId++
 			if args.Alliance == "red" {
 				web.arena.RedRealtimeScore.CurrentScore.Fouls =
 					append(web.arena.RedRealtimeScore.CurrentScore.Fouls, foul)
@@ -218,9 +214,12 @@ func (web *Web) scoringPanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 					append(web.arena.BlueRealtimeScore.CurrentScore.Fouls, foul)
 			}
 			web.arena.RealtimeScoreNotifier.Notify()
-		} else if command == "fuel" {
+		} else {
 			args := struct {
 				Adjustment int
+				Current    bool
+				Autonomous bool
+				NearSide   bool
 			}{}
 			err = mapstructure.Decode(data, &args)
 			if err != nil {
@@ -228,8 +227,20 @@ func (web *Web) scoringPanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 				continue
 			}
 
-			score.Fuel = max(0, score.Fuel+args.Adjustment)
-			scoreChanged = true
+			// TODO: Add REBUILT-specific scoring commands here
+			switch command {
+			case "activeFuel":
+				score.ActiveFuel = max(0, score.ActiveFuel+args.Adjustment)
+				scoreChanged = true
+			case "inactiveFuel":
+				score.InactiveFuel = max(0, score.InactiveFuel+args.Adjustment)
+				scoreChanged = true
+			case "autoFuel":
+				if args.Autonomous {
+					score.AutoFuel = max(0, score.AutoFuel+args.Adjustment)
+					scoreChanged = true
+				}
+			}
 		}
 
 		if scoreChanged {

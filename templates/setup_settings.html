@@ -240,6 +240,27 @@ UI for configuring event settings.
                   </select>
                 </div>
               </div>
+              <div class="row mb-3">
+                <label class="col-lg-6 control-label">ENERGIZED RP Threshold (FUEL in HUB)</label>
+                <div class="col-lg-6">
+                  <input type="text" class="form-control" id="energizedRPThreshold" name="energizedRPThreshold"
+                    value="{{.EnergizedRPThreshold}}">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-6 control-label">SUPERCHARGED RP Threshold (FUEL in HUB)</label>
+                <div class="col-lg-6">
+                  <input type="text" class="form-control" id="superchargedRPThreshold"
+                    name="superchargedRPThreshold" value="{{.SuperchargedRPThreshold}}">
+                </div>
+              </div>
+              <div class="row">
+                <label class="col-lg-6 control-label">TRAVERSAL RP Threshold (TOWER Points)</label>
+                <div class="col-lg-6">
+                  <input type="text" class="form-control" id="traversalRPThreshold" name="traversalRPThreshold"
+                    value="{{.TraversalRPThreshold}}">
+                </div>
+              </div>
             </fieldset>
           </div>
           <div class="tab-pane" id="field" role="tabpanel">
@@ -354,7 +375,7 @@ UI for configuring event settings.
               </div>
             </fieldset>
             <fieldset class="mb-4">
-                <legend>Alternate IO</legend>
+              <legend>Alternate IO</legend>
               <div class="row mb-3">
                 <label class="col-lg-8 control-label" for="alternateIOEnabled">
                   Enable Alternate IO (IE: Raspberry Pi)
@@ -401,6 +422,15 @@ UI for configuring event settings.
                 <div class="col-lg-1 checkbox">
                   <input type="checkbox" id="apiMonitorEnabled"
                     name="apiMonitorEnabled"{{if .ApiMonitorEnabled}} checked{{end}}>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset class="mb-4">
+              <legend>DMX Lighting</legend>
+              <div class="row mb-3">
+                <label class="col-lg-6 control-label">DMX Address</label>
+                <div class="col-lg-6">
+                  <input type="text" class="form-control" name="dmxAddress" value="{{.DMXAddress}}" placeholder="10.0.100.60">
                 </div>
               </div>
             </fieldset>
