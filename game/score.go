@@ -12,6 +12,7 @@ type Score struct {
 	EndgameStatuses [3]EndgameStatus
 	Fouls           []Foul
 	PlayoffDq       bool
+	Hubstate		bool
 }
 
 // Game-specific settings that can be changed via the settings.
@@ -32,6 +33,7 @@ const (
 func (score *Score) Summarize(opponentScore *Score) *ScoreSummary {
 	summary := new(ScoreSummary)
 
+	summary.Hubstate = score.Hubstate
 	// Leave the score at zero if the alliance was disqualified.
 	if score.PlayoffDq {
 		return summary
