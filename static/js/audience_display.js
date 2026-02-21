@@ -180,16 +180,16 @@ const updateHubIndicators = function(scoreData) {
   const elem = $(".shift-container");
   let bgColor = "#2a2a2a";  // default / neutral / both false
 
-  if (!data.Red?.ScoreSummary?.Hubstate && !data.Blue?.ScoreSummary?.Hubstate) {
+  if (!scoreData.Red?.ScoreSummary?.Hubstate && !scoreData.Blue?.ScoreSummary?.Hubstate) {
       bgColor = "#8A2BE2";   // vivid violet (classic "both" mix - #8A2BE2)
       // Alternatives you can swap in:
       // "#9F00FF"  // bright magenta-violet
       // "#7F00FF"  // pure violet
       // "#A020F0"  // strong purple
       // "#6A1B9A"  // deeper purple (less blinding)
-  } else if (data.Red?.ScoreSummary?.Hubstate) {
+  } else if (scoreData.Red?.ScoreSummary?.Hubstate) {
       bgColor = "#ff4444";   // your bright red
-  } else if (data.Blue?.ScoreSummary?.Hubstate) {
+  } else if (scoreData.Blue?.ScoreSummary?.Hubstate) {
       bgColor = "#2080ff";   // your blue
   }
 
