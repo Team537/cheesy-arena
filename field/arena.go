@@ -114,6 +114,7 @@ type Arena struct {
 	lastPlcNotifyTime 				  time.Time
 	Esp32                             plc.Esp32
 	HubsActive                        int // Bitmask 1=Red, 2=Blue
+	LastHubsActive                    int // Bitmask 1=Red, 2=Blue
 	FirstShiftHubState                int // Calculated at end of Auto, used for Shift1
 	NextFoulId                        int
 	autoTieWinner                     string // "red" or "blue" - randomly chosen at match start for tie-breaking
@@ -792,7 +793,12 @@ func (arena *Arena) Update() {
 
 	arena.RedRealtimeScore.CurrentScore.Hubstate = arena.HubsActive == 1
 	arena.BlueRealtimeScore.CurrentScore.Hubstate = arena.HubsActive == 2
-	arena.RealtimeScoreNotifier.Notify()
+
+	if(arena.LastHubsActive != arena.HubsActive) {
+		arena.LastHubsActive = arena.HubsActive
+		arena.RealtimeScoreNotifier.Notify()
+	}
+	
 }
 
 // Checks if the endgame warning period has started and triggers the Companion event if so.
