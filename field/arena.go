@@ -106,9 +106,10 @@ type Arena struct {
 	soundsPlayed                      map[*game.MatchSound]struct{}
 	breakDescription                  string
 	preloadedTeams                    *[6]*model.Team
-	lastPlcNotifyTime 				  time.Time
+	lastPlcNotifyTime                 time.Time
 	Esp32                             plc.Esp32
 	HubsActive                        int // Bitmask 1=Red, 2=Blue
+	LastHubsActive                    int // Bitmask 1=Red, 2=Blue
 	FirstShiftHubState                int // Calculated at end of Auto, used for Shift1
 }
 
@@ -224,6 +225,7 @@ func (arena *Arena) LoadSettings() error {
 	arena.Esp32.SetBlueAllianceStationEstopAddress(settings.BlueAllianceStationEstopAddress)
 	arena.Esp32.SetRedAllianceHubAddress(settings.RedHubAddress)
 	arena.Esp32.SetBlueAllianceHubAddress(settings.BlueHubAddress)
+	arena.Esp32.SetApiMonitorEnabled(settings.ApiMonitorEnabled)
 	arena.TbaClient = partner.NewTbaClient(settings.TbaEventCode, settings.TbaSecretId, settings.TbaSecret)
 	arena.NexusClient = partner.NewNexusClient(settings.TbaEventCode)
 	arena.BlackmagicClient = partner.NewBlackmagicClient(settings.BlackmagicAddresses)
@@ -601,6 +603,8 @@ func (arena *Arena) Update() {
 		arena.AllianceStationDisplayMode = "match"
 		arena.AllianceStationDisplayModeNotifier.Notify()
 		arena.HubsActive = 0
+		arena.RedRealtimeScore.CurrentScore.Hubstate = false
+		arena.BlueRealtimeScore.CurrentScore.Hubstate = false
 		go arena.BlackmagicClient.StartRecording()
 		if game.MatchTiming.WarmupDurationSec > 0 {
 			arena.MatchState = WarmupPeriod
@@ -610,7 +614,7 @@ func (arena *Arena) Update() {
 			arena.MatchState = AutoPeriod
 			enabled = true
 			sendDsPacket = true
-			arena.HubsActive =  BlueAllianceHubBit | RedAllianceHubBit
+			arena.HubsActive = BlueAllianceHubBit | RedAllianceHubBit
 		}
 		arena.Plc.ResetMatch()
 		arena.FieldVolunteers = false
@@ -623,7 +627,7 @@ func (arena *Arena) Update() {
 			auto = true
 			enabled = true
 			sendDsPacket = true
-			arena.HubsActive =  BlueAllianceHubBit | RedAllianceHubBit
+			arena.HubsActive = BlueAllianceHubBit | RedAllianceHubBit
 		}
 	case AutoPeriod:
 		auto = true
@@ -649,7 +653,7 @@ func (arena *Arena) Update() {
 		}
 	case TransitionShift:
 		auto = false
-		enabled = false
+		enabled = true
 		if matchTimeSec >= game.GetDurationToShift1Start().Seconds() {
 			arena.MatchState = Shift1
 			auto = false
@@ -701,7 +705,9 @@ func (arena *Arena) Update() {
 			arena.HubsActive = BlueAllianceHubBit | RedAllianceHubBit
 		}
 	case EndGame:
-		arena.HubsActive =  BlueAllianceHubBit | RedAllianceHubBit
+		auto = false
+		enabled = true
+		arena.HubsActive = BlueAllianceHubBit | RedAllianceHubBit
 		if matchTimeSec >= game.GetDurationToTeleopEnd().Seconds() {
 			arena.MatchState = PostMatch
 			auto = false
@@ -764,6 +770,14 @@ func (arena *Arena) Update() {
 
 	arena.LastMatchTimeSec = matchTimeSec
 	arena.lastMatchState = arena.MatchState
+
+	arena.RedRealtimeScore.CurrentScore.Hubstate = arena.HubsActive == 1
+	arena.BlueRealtimeScore.CurrentScore.Hubstate = arena.HubsActive == 2
+
+	if arena.LastHubsActive != arena.HubsActive {
+		arena.LastHubsActive = arena.HubsActive
+		arena.RealtimeScoreNotifier.Notify()
+	}
 
 }
 
@@ -1052,13 +1066,13 @@ func (arena *Arena) handlePlcInputOutput() {
 	arena.handleTeamStop("B1", blueEStops[0], blueAStops[0])
 	arena.handleTeamStop("B2", blueEStops[1], blueAStops[1])
 	arena.handleTeamStop("B3", blueEStops[2], blueAStops[2])
-	
+
 	// Only notify every 500ms
-    if arena.lastPlcNotifyTime.IsZero() || time.Since(arena.lastPlcNotifyTime) >= 500*time.Millisecond {
-        //arena.PlcCoilsNotifier.Notify()
-        //arena.Plc.IoChangeNotifier().Notify()
-        arena.lastPlcNotifyTime = time.Now()
-    }
+	if arena.lastPlcNotifyTime.IsZero() || time.Since(arena.lastPlcNotifyTime) >= 500*time.Millisecond {
+		//arena.PlcCoilsNotifier.Notify()
+		//arena.Plc.IoChangeNotifier().Notify()
+		arena.lastPlcNotifyTime = time.Now()
+	}
 
 	// If the PLC is not enabled, or alternate I/O is not enabled, do not process any further PLC inputs.
 	if !arena.Plc.IsEnabled() && !arena.EventSettings.AlternateIOEnabled { // && not alternateIO Enabled
