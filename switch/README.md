@@ -86,7 +86,22 @@ All instances of \<ClearTextPassword\> in the config file will be replaced with 
 
 ```text
 ./deploy_config.sh <config_file> <ip> '<current_pass>' '<new_pass>'
+./deploy_config.sh Cisco3850_48_FMS_Switch_Config.txt 10.0.100.3 '<current_pass>' '<new_pass>'
 ```
+
+For the 48-port Catalyst 3850 used as a Layer 2 Alliance Red switch, use
+`Cisco3850_48_AllianceRed_Switch_Config.txt`. It keeps the switch-management
+address on VLAN 100 and uses `no ip routing`; port 1 is the trunk, ports 2-4
+are the Red driver stations, and ports 5-48 are FMS infrastructure access ports.
+On the reported switch, these correspond to interfaces `GigabitEthernet2/0/1`
+through `GigabitEthernet2/0/48`.
+
+For the matching Layer 2 Alliance Blue switch, use
+`Cisco3850_48_AllianceBlue_Switch_Config.txt`. Port 1 is the trunk, ports 2-4
+are the Blue driver stations on VLANs 40, 50, and 60, and ports 5-48 are FMS
+infrastructure access ports. Its VLAN 100 management address is 10.0.100.11.
+On the reported switch, these correspond to interfaces `GigabitEthernet2/0/1`
+through `GigabitEthernet2/0/48`.
 
 Note: You may need to run 'chmod +x *.sh' to make the shell scripts executable when initially pulled from GitHub
 
@@ -104,4 +119,8 @@ Due to the age of these switches you need to specify the algorithems and ciphers
 Example:
 ```text
 ssh -o KexAlgorithms=+diffie-hellman-group1-sha1 -o HostKeyAlgorithms=+ssh-rsa -o Ciphers=+aes128-cbc admin@10.0.100.3
+
+ssh -o KexAlgorithms=+diffie-hellman-group14-sha1 -o HostKeyAlgorithms=+ssh-rsa -o Ciphers=+aes128-cbc admin@10.0.100.10
+
+ssh -o KexAlgorithms=+diffie-hellman-group14-sha1 -o HostKeyAlgorithms=+ssh-rsa -o Ciphers=+aes128-cbc admin@10.0.100.11
 ```
