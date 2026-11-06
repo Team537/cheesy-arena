@@ -1,0 +1,2 @@
+{{range $match := .}}{{$match.Type}} {{$match.ShortName}} {{$match.Blue1}} {{$match.Blue2}} {{$match.Blue3}} {{$match.Red1}} {{$match.Red2}} {{$match.Red3}}
+{{end}}
