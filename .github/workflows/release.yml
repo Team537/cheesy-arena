@@ -34,6 +34,7 @@ jobs:
       - name: Set additional environment variables
         run: |
           echo "LINUX_X64_FILENAME=cheesy-arena.${GITHUB_REF:10}.linux.x64.zip" >> $GITHUB_ENV
+          echo "LINUX_ARM64_FILENAME=cheesy-arena.${GITHUB_REF:10}.linux.arm64.zip" >> $GITHUB_ENV
           echo "MACOS_X64_FILENAME=cheesy-arena.${GITHUB_REF:10}.macos.x64.zip" >> $GITHUB_ENV
           echo "MACOS_M1_FILENAME=cheesy-arena.${GITHUB_REF:10}.macos.m1.zip" >> $GITHUB_ENV
           echo "WINDOWS_X64_FILENAME=cheesy-arena.${GITHUB_REF:10}.windows.x64.zip" >> $GITHUB_ENV
@@ -54,6 +55,24 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./${{ env.LINUX_X64_FILENAME }}
           asset_name: ${{ env.LINUX_X64_FILENAME }}
+          asset_content_type: application/zip
+
+      - name: Build Linux ARM64 bundle
+        run: |
+          rm -rf cheesy-arena*
+          mkdir cheesy-arena
+          GOOS=linux GOARCH=arm64 go build -o cheesy-arena/
+          cp -r ${{ env.ASSET_FILES }} cheesy-arena/
+          zip -r -X ${{ env.LINUX_ARM64_FILENAME }} cheesy-arena
+
+      - name: Upload Linux ARM64 bundle
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.LINUX_ARM64_FILENAME }}
+          asset_name: ${{ env.LINUX_ARM64_FILENAME }}
           asset_content_type: application/zip
 
       - name: Build MacOS x64 bundle
