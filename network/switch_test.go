@@ -15,6 +15,7 @@ import (
 
 func TestConfigureSwitch(t *testing.T) {
 	sw := NewSwitch("127.0.0.1", "password")
+	sw.sshPort = unusedSwitchPort(t)
 	assert.Equal(t, "UNKNOWN", sw.Status)
 	sw.port = 9050
 	sw.configBackoffDuration = time.Millisecond

@@ -1,7 +1,7 @@
 // Copyright 2014 Team 254. All Rights Reserved.
 // Author: pat@patfairbank.com (Patrick Fairbank)
 //
-// Methods for configuring a Cisco Switch 3500-series switch for team VLANs.
+// Methods for configuring Cisco IOS and IOS XE switches for team VLANs.
 
 package network
 
@@ -10,7 +10,12 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Team254/cheesy-arena/model"
+	"golang.org/x/crypto/ssh"
+	"io"
+	"log"
 	"net"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -20,6 +25,9 @@ const (
 	switchConfigPauseDurationSec   = 2
 	switchTeamGatewayAddress       = 4
 	switchTelnetPort               = 23
+	switchSSHPort                  = 22
+	switchConnectTimeout           = 5 * time.Second
+	switchCommandTimeout           = 30 * time.Second
 )
 
 const (
@@ -34,6 +42,9 @@ const (
 type Switch struct {
 	address               string
 	port                  int
+	sshPort               int
+	username              string
+	telnetUsername        string
 	password              string
 	mutex                 sync.Mutex
 	configBackoffDuration time.Duration
@@ -50,10 +61,21 @@ func NewSwitch(address, password string) *Switch {
 	return &Switch{
 		address:               address,
 		port:                  switchTelnetPort,
+		sshPort:               switchSSHPort,
+		username:              "admin",
 		password:              password,
 		configBackoffDuration: switchConfigBackoffDurationSec * time.Second,
 		configPauseDuration:   switchConfigPauseDurationSec * time.Second,
 		Status:                "UNKNOWN",
+	}
+}
+
+// Sets the login name used by SSH and by username/password Telnet authentication.
+func (sw *Switch) SetUsername(username string) {
+	sw.telnetUsername = username
+	sw.username = username
+	if sw.username == "" {
+		sw.username = "admin"
 	}
 }
 
@@ -127,17 +149,77 @@ func (sw *Switch) ConfigureTeamEthernet(teams [6]*model.Team) error {
 	return nil
 }
 
-// Logs into the switch via Telnet and runs the given command in user exec mode. Reads the output and
-// returns it as a string.
+// Prefers SSH, falling back to Telnet only if the SSH TCP connection cannot be established.
 func (sw *Switch) runCommand(command string) (string, error) {
-	// Open a Telnet connection to the switch.
-	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", sw.address, sw.port))
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(sw.address, strconv.Itoa(sw.sshPort)), switchConnectTimeout)
+	if err == nil {
+		defer conn.Close()
+		if err := conn.SetDeadline(time.Now().Add(switchCommandTimeout)); err != nil {
+			return "", err
+		}
+		return sw.runSSHCommand(conn, command)
+	}
+	log.Printf("Switch SSH port unavailable; falling back to plaintext Telnet: %v", err)
+	return sw.runTelnetCommand(command)
+}
+
+func (sw *Switch) runSSHCommand(conn net.Conn, command string) (string, error) {
+	config := &ssh.ClientConfig{
+		User: sw.username,
+		Auth: []ssh.AuthMethod{ssh.Password(sw.password)},
+		// Field switches use locally generated host keys, as do the SCC switches.
+		HostKeyCallback:   ssh.InsecureIgnoreHostKey(),
+		HostKeyAlgorithms: append(ssh.SupportedAlgorithms().HostKeys, ssh.KeyAlgoRSA),
+		Config: ssh.Config{
+			KeyExchanges: []string{
+				ssh.KeyExchangeCurve25519, ssh.KeyExchangeDH14SHA256, ssh.InsecureKeyExchangeDH1SHA1,
+			},
+			Ciphers: []string{ssh.CipherAES128GCM, ssh.CipherAES128CTR, ssh.InsecureCipherAES128CBC},
+		},
+	}
+	sshConn, channels, requests, err := ssh.NewClientConn(conn, conn.RemoteAddr().String(), config)
+	if err != nil {
+		return "", fmt.Errorf("switch SSH handshake failed (Telnet fallback disabled): %w", err)
+	}
+	client := ssh.NewClient(sshConn, channels, requests)
+	defer client.Close()
+	session, err := client.NewSession()
+	if err != nil {
+		return "", fmt.Errorf("create switch SSH session: %w", err)
+	}
+	defer session.Close()
+	input, err := session.StdinPipe()
+	if err != nil {
+		return "", err
+	}
+	output, err := session.StdoutPipe()
+	if err != nil {
+		return "", err
+	}
+	if err := session.RequestPty("vt100", 40, 80, ssh.TerminalModes{ssh.ECHO: 0}); err != nil {
+		return "", fmt.Errorf("request switch SSH terminal: %w", err)
+	}
+	if err := session.Shell(); err != nil {
+		return "", fmt.Errorf("start switch SSH shell: %w", err)
+	}
+	return sw.runInteractiveCommand(bufio.NewReader(output), input, command)
+}
+
+func (sw *Switch) runTelnetCommand(command string) (string, error) {
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(sw.address, strconv.Itoa(sw.port)), switchConnectTimeout)
 	if err != nil {
 		return "", err
 	}
 	defer conn.Close()
+	if err := conn.SetDeadline(time.Now().Add(switchCommandTimeout)); err != nil {
+		return "", err
+	}
+	if sw.telnetUsername != "" {
+		reader := &switchTelnetReader{reader: bufio.NewReader(conn), writer: conn}
+		return sw.runInteractiveCommand(bufio.NewReader(reader), conn, command)
+	}
 
-	// Login to the AP, send the command, and log out all at once.
+	// Preserve the password-only login used by the original baseline configuration.
 	writer := bufio.NewWriter(conn)
 	_, err = writer.WriteString(
 		fmt.Sprintf(
@@ -159,11 +241,167 @@ func (sw *Switch) runCommand(command string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return reader.String(), nil
+	output := reader.String()
+	if err := switchCommandError(output); err != nil {
+		return output, err
+	}
+	return output, nil
 }
 
-// Logs into the switch via Telnet and runs the given command in global configuration mode. Reads the output
+// Logs into the switch and runs the given command in global configuration mode. Reads the output
 // and returns it as a string.
 func (sw *Switch) runConfigCommand(command string) (string, error) {
 	return sw.runCommand(fmt.Sprintf("config terminal\n%send\n", command))
+}
+
+func (sw *Switch) runInteractiveCommand(reader *bufio.Reader, writer io.Writer, command string) (string, error) {
+	var output strings.Builder
+	readPrompt := func() (string, error) {
+		var response strings.Builder
+		for {
+			b, err := reader.ReadByte()
+			if err != nil {
+				return "", fmt.Errorf("read switch prompt: %w", err)
+			}
+			response.WriteByte(b)
+			text := response.String()
+			line := strings.TrimSpace(text[strings.LastIndex(text, "\n")+1:])
+			lowerLine := strings.ToLower(line)
+			if strings.HasSuffix(line, "#") || strings.HasSuffix(line, ">") ||
+				strings.HasSuffix(lowerLine, "password:") || strings.HasSuffix(lowerLine, "username:") ||
+				strings.HasSuffix(lowerLine, "login:") {
+				output.WriteString(text)
+				return line, switchCommandError(text)
+			}
+		}
+	}
+	send := func(text string) error {
+		_, err := fmt.Fprintln(writer, text)
+		return err
+	}
+	prompt, err := readPrompt()
+	if err != nil {
+		return output.String(), err
+	}
+	if strings.HasSuffix(strings.ToLower(prompt), "username:") ||
+		strings.HasSuffix(strings.ToLower(prompt), "login:") {
+		if err := send(sw.username); err != nil {
+			return output.String(), err
+		}
+		prompt, err = readPrompt()
+		if err != nil {
+			return output.String(), err
+		}
+	}
+	if strings.HasSuffix(strings.ToLower(prompt), "password:") {
+		if err := send(sw.password); err != nil {
+			return output.String(), err
+		}
+		prompt, err = readPrompt()
+		if err != nil {
+			return output.String(), err
+		}
+	}
+	if strings.HasSuffix(prompt, ">") {
+		if err := send("enable"); err != nil {
+			return output.String(), err
+		}
+		prompt, err = readPrompt()
+		if err != nil {
+			return output.String(), err
+		}
+		if strings.HasSuffix(strings.ToLower(prompt), "password:") {
+			if err := send(sw.password); err != nil {
+				return output.String(), err
+			}
+			prompt, err = readPrompt()
+			if err != nil {
+				return output.String(), err
+			}
+		}
+	}
+	if !strings.HasSuffix(prompt, "#") {
+		return output.String(), fmt.Errorf("switch did not grant privileged EXEC mode")
+	}
+	for _, line := range strings.Split("terminal length 0\n"+strings.TrimSpace(command), "\n") {
+		if err := send(line); err != nil {
+			return output.String(), err
+		}
+		prompt, err = readPrompt()
+		if err != nil {
+			return output.String(), err
+		}
+		if !strings.HasSuffix(prompt, "#") {
+			return output.String(), fmt.Errorf("switch lost privileged mode")
+		}
+	}
+	return output.String(), send("exit")
+}
+
+// Declines Telnet options; the switch CLI only needs a plain character stream.
+type switchTelnetReader struct {
+	reader *bufio.Reader
+	writer io.Writer
+}
+
+func (r *switchTelnetReader) Read(p []byte) (int, error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+	for {
+		b, err := r.reader.ReadByte()
+		if err != nil {
+			return 0, err
+		}
+		if b != 255 {
+			p[0] = b
+			return 1, nil
+		}
+		command, err := r.reader.ReadByte()
+		if err != nil {
+			return 0, err
+		}
+		switch command {
+		case 255:
+			p[0] = 255
+			return 1, nil
+		case 251, 252, 253, 254:
+			option, err := r.reader.ReadByte()
+			if err != nil {
+				return 0, err
+			}
+			if command == 251 || command == 253 {
+				reply := byte(254)
+				if command == 253 {
+					reply = 252
+				}
+				if _, err := r.writer.Write([]byte{255, reply, option}); err != nil {
+					return 0, err
+				}
+			}
+		case 250:
+			var previous byte
+			for {
+				next, err := r.reader.ReadByte()
+				if err != nil {
+					return 0, err
+				}
+				if previous == 255 && next == 240 {
+					break
+				}
+				previous = next
+			}
+		}
+	}
+}
+
+func switchCommandError(output string) error {
+	for _, marker := range []string{
+		"% Invalid", "% Error", "% Incomplete", "% Ambiguous", "% Authorization", "% Access denied", "% Bad",
+	} {
+		if strings.Contains(output, marker) {
+			return fmt.Errorf("switch rejected command: %s", marker)
+		}
+	}
+	return nil
 }
