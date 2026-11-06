@@ -36,7 +36,8 @@ func TestSetupSettings(t *testing.T) {
 		"/setup/settings",
 		"name=Chezy Champs&code=CC&playoffType=single&numPlayoffAlliances=16&tbaPublishingEnabled=on&"+
 			"tbaEventCode=2014cc&tbaSecretId=secretId&tbaSecret=tbasec&transitionShiftDurationSec=12&"+
-			"shiftDurationSec=24&endgameDurationSec=32&ledControllerAddress=10.0.100.61&ledUniverseMode=two",
+			"shiftDurationSec=24&endgameDurationSec=32&ledControllerAddress=10.0.100.61&ledUniverseMode=two&"+
+			"switchUsername=fieldadmin&switchPassword=switchpass",
 	)
 	assert.Equal(t, 303, recorder.Code)
 	assert.Equal(t, "/setup/settings#event", recorder.Header().Get("Location"))
@@ -52,6 +53,12 @@ func TestSetupSettings(t *testing.T) {
 	assert.Equal(t, 32, web.arena.EventSettings.EndgameDurationSec)
 	assert.Equal(t, "10.0.100.61", web.arena.EventSettings.LedControllerAddress)
 	assert.Equal(t, "two", web.arena.EventSettings.LedUniverseMode)
+	assert.Equal(t, "fieldadmin", web.arena.EventSettings.SwitchUsername)
+	assert.Contains(t, recorder.Body.String(), `name="switchUsername" value="fieldadmin"`)
+	settings, err := web.arena.Database.GetEventSettings()
+	assert.NoError(t, err)
+	assert.Equal(t, "fieldadmin", settings.SwitchUsername)
+	assert.Equal(t, "switchpass", settings.SwitchPassword)
 	assert.Equal(t, 140, game.GetTeleopDurationSec())
 
 	recorder = web.postHttpResponse("/setup/settings", "name=Field Tab Event&activeSettingsTab=field")

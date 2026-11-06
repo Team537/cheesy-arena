@@ -252,7 +252,7 @@ UI for configuring event settings.
           <div class="tab-pane" id="field" role="tabpanel">
             <fieldset class="mb-4">
               <legend>Networking</legend>
-              <p>Enable this setting if you have a Vivid-Hosting VH-113 access point and Cisco Catalyst 3500-series
+              <p>Enable this setting if you have a Vivid-Hosting VH-113 access point and Cisco Catalyst IOS or IOS XE
                 switch
                 available, for isolating each team to its own SSID and VLAN.</p>
               <div class="row mb-3">
@@ -294,6 +294,14 @@ UI for configuring event settings.
                   <input type="text" class="form-control" name="switchAddress" value="{{.SwitchAddress}}" placeholder="10.0.100.3">
                 </div>
               </div>
+              <div class="row mb-3">
+                <label class="col-lg-6 control-label">Switch SSH Username</label>
+                <div class="col-lg-6">
+                  <input type="text" class="form-control" name="switchUsername" value="{{.SwitchUsername}}" placeholder="admin">
+                </div>
+              </div>
+              <p>SSH is preferred. Plaintext Telnet is used only when the SSH port is unreachable.
+                The SSH username defaults to admin. The password also serves as the enable password.</p>
               <div class="row mb-3">
                 <label class="col-lg-6 control-label">Switch Password</label>
                 <div class="col-lg-6">

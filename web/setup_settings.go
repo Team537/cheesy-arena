@@ -126,6 +126,7 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	eventSettings.ApPassword = r.PostFormValue("apPassword")
 	eventSettings.ApChannel, _ = strconv.Atoi(r.PostFormValue("apChannel"))
 	eventSettings.SwitchAddress = r.PostFormValue("switchAddress")
+	eventSettings.SwitchUsername = r.PostFormValue("switchUsername")
 	eventSettings.SwitchPassword = r.PostFormValue("switchPassword")
 	eventSettings.SCCManagementEnabled = r.PostFormValue("sccManagementEnabled") == "on"
 	eventSettings.RedSCCAddress = r.PostFormValue("redSCCAddress")

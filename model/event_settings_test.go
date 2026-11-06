@@ -50,6 +50,7 @@ func TestEventSettingsReadWrite(t *testing.T) {
 	eventSettings.NumPlayoffAlliances = 6
 	eventSettings.SelectionRound2Order = "F"
 	eventSettings.SelectionRound3Order = "L"
+	eventSettings.SwitchUsername = "fieldadmin"
 	err = db.UpdateEventSettings(eventSettings)
 	assert.Nil(t, err)
 	eventSettings2, err := db.GetEventSettings()

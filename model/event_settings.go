@@ -6,9 +6,8 @@
 package model
 
 import (
-	"strings"
-
 	"github.com/Team254/cheesy-arena/game"
+	"strings"
 )
 
 type PlayoffType int
@@ -60,6 +59,7 @@ type EventSettings struct {
 	ApPassword                       string
 	ApChannel                        int
 	SwitchAddress                    string
+	SwitchUsername                   string
 	SwitchPassword                   string
 	SCCManagementEnabled             bool
 	RedSCCAddress                    string

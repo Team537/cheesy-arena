@@ -112,6 +112,31 @@ with [Advatek](https://www.advateklights.com) controllers and LEDs.
 
 ## Advanced networking
 
+The field switch supports Cisco IOS (including the existing Catalyst 3500-series) and IOS XE
+(including the Catalyst 3850). Per-match VLAN and DHCP commands are shared by both platforms.
+The existing [switch baseline](switch_config.txt) is for the older hardware; it is not a
+3850 configuration. IOS XE interfaces typically use names such as `GigabitEthernet1/0/1`,
+and its fixed 802.1Q trunks do not accept `switchport trunk encapsulation dot1q`.
+Provision the same VLANs, routing, ACLs, and port assignments before enabling network management.
+
+Cheesy Arena tries SSH on port 22 first and uses Telnet on port 23 only when the SSH TCP
+connection cannot be established. SSH negotiation, authentication, and command failures
+are reported without falling back to Telnet. Set **Switch SSH Username** in the field
+settings to the switch's local username (SSH defaults to `admin` if blank).
+When a username is configured, Telnet also uses interactive username/password login;
+leaving it blank preserves the original password-only Telnet login.
+**Switch Password** is used for both login and `enable`; privilege-15 SSH logins are supported.
+Configure IOS XE for SSH v2, generate its host key, and enable the desired VTY transports
+(`transport input telnet ssh` with `login local` for username/password login).
+
+SSH supports `curve25519-sha256`, `diffie-hellman-group14-sha256`, and
+`diffie-hellman-group1-sha1` key exchange, with `aes128-gcm@openssh.com`, `aes128-ctr`,
+and `aes128-cbc` ciphers, in that preference order. Available algorithms on the switch
+depend on its IOS XE release. Group1/SHA-1, AES-CBC, and RSA/SHA-1 host signatures are
+legacy compatibility options; prefer modern algorithms. Like the SCC switch client,
+the field switch client accepts unverified host keys. Telnet transmits credentials in
+plaintext, so restrict management access to a trusted, isolated field network.
+
 See the [Advanced Networking wiki page](https://github.com/Team254/cheesy-arena/wiki/Advanced-Networking-Concepts) for
 instructions on what equipment to obtain and how to configure it in order to support advanced network security.
 

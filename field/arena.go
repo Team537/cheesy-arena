@@ -202,6 +202,7 @@ func (arena *Arena) LoadSettings() error {
 		accessPointWifiStatuses,
 	)
 	arena.networkSwitch = network.NewSwitch(settings.SwitchAddress, settings.SwitchPassword)
+	arena.networkSwitch.SetUsername(settings.SwitchUsername)
 	sccUpCommands := strings.Split(settings.SCCUpCommands, "\n")
 	sccDownCommands := strings.Split(settings.SCCDownCommands, "\n")
 	arena.redSCC = network.NewSCCSwitch(
