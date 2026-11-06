@@ -1,5 +1,5 @@
 # --- STAGE 1: Build the binary ---
-FROM golang:1.25-bookworm AS builder
+FROM golang:1.26-bookworm AS builder
 
 # Set working directory
 WORKDIR /src
