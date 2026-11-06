@@ -37,6 +37,7 @@ jobs:
           echo "MACOS_X64_FILENAME=freezy-arena.${GITHUB_REF:10}.macos.x64.zip" >> $GITHUB_ENV
           echo "MACOS_M1_FILENAME=freezy-arena.${GITHUB_REF:10}.macos.m1.zip" >> $GITHUB_ENV
           echo "WINDOWS_X64_FILENAME=freezy-arena.${GITHUB_REF:10}.windows.x64.zip" >> $GITHUB_ENV
+          echo "LINUX_ARM64_FILENAME=freezy-arena.${GITHUB_REF:10}.linux.arm64.zip" >> $GITHUB_ENV
 
       - name: Build Linux bundle
         run: |
@@ -54,6 +55,24 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./${{ env.LINUX_X64_FILENAME }}
           asset_name: ${{ env.LINUX_X64_FILENAME }}
+          asset_content_type: application/zip
+
+      - name: Build Linux ARM64 bundle
+        run: |
+          rm -rf freezy-arena*
+          mkdir freezy-arena
+          GOOS=linux GOARCH=arm64 go build -o freezy-arena/
+          cp -r ${{ env.ASSET_FILES }} freezy-arena/
+          zip -r -X ${{ env.LINUX_ARM64_FILENAME }} freezy-arena
+
+      - name: Upload Linux ARM64 bundle
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.LINUX_ARM64_FILENAME }}
+          asset_name: ${{ env.LINUX_ARM64_FILENAME }}
           asset_content_type: application/zip
 
       - name: Build MacOS x64 bundle
