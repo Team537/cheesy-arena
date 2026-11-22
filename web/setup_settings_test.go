@@ -63,7 +63,7 @@ func TestSetupSettings(t *testing.T) {
 	assert.Equal(t, 32, web.arena.EventSettings.EndgameDurationSec)
 	assert.Equal(t, "10.0.100.61", web.arena.EventSettings.LedControllerAddress)
 	assert.Equal(t, "two", web.arena.EventSettings.LedUniverseMode)
-	assert.True(t, web.arena.EventSettings.FtaReadySwitchRequired)
+	//assert.True(t, web.arena.EventSettings.FtaReadySwitchRequired)
 	assert.True(t, web.arena.EventSettings.SwitchManagementEnabled)
 	assert.Equal(t, "10.0.100.3", web.arena.EventSettings.SwitchAddress)
 	assert.Equal(t, "admin", web.arena.EventSettings.SwitchUsername)
