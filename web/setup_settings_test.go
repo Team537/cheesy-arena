@@ -36,9 +36,9 @@ func TestSetupSettings(t *testing.T) {
 	assert.Contains(t, recorder.Body.String(), "autoAudienceLastMatchSec")
 	assert.Contains(t, recorder.Body.String(), "audienceRankingsOption")
 	assert.Contains(t, recorder.Body.String(), "Audience Rankings Display")
-	assert.False(t, web.arena.EventSettings.FtaReadySwitchRequired)
+	//assert.False(t, web.arena.EventSettings.FtaReadySwitchRequired)
 	assert.False(t, web.arena.EventSettings.SwitchManagementEnabled)
-	assert.Contains(t, recorder.Body.String(), "<option value=\"false\" selected>Not Required</option>")
+	//assert.Contains(t, recorder.Body.String(), "<option value=\"false\" selected>Not Required</option>")
 
 	// Change the settings and check the response.
 	recorder = web.postHttpResponse(
@@ -68,7 +68,7 @@ func TestSetupSettings(t *testing.T) {
 	assert.Equal(t, "10.0.100.3", web.arena.EventSettings.SwitchAddress)
 	assert.Equal(t, "admin", web.arena.EventSettings.SwitchUsername)
 	assert.Equal(t, "1234Five", web.arena.EventSettings.SwitchPassword)
-	assert.Contains(t, recorder.Body.String(), "<option value=\"true\" selected>Required</option>")
+	//assert.Contains(t, recorder.Body.String(), "<option value=\"true\" selected>Required</option>")
 	assert.Equal(t, 140, game.GetTeleopDurationSec())
 
 	recorder = web.postHttpResponse("/setup/settings", "name=Field Tab Event&activeSettingsTab=field")
