@@ -20,15 +20,18 @@ Display showing robot connection status in the style of FMS Field Monitor.
 
   <body>
     <div id="matchStatusRow" class="ds-dependent">
-      {{if .EventSettings.NetworkSecurityEnabled}}
+      {{if or .EventSettings.NetworkSecurityEnabled .EventSettings.SwitchManagementEnabled}}
       <div id="matchName" class="text-start" style="width: 20%; padding-left: 1%;"></div>
       <div id="fieldConnection" style="width: 25%; padding-left: 1%;">
+        {{if .EventSettings.NetworkSecurityEnabled}}
         <span class="badge badge-status" id="accessPointStatus"><i class="bi bi-wifi"></i> Access Point
         </span>
+        {{end}}
+        {{if .EventSettings.SwitchManagementEnabled}}
         <span class="badge badge-status" id="switchStatus"> <i class="bi bi-hdd-network"></i> Switch</span>
+        {{end}}
       </div>
-      {{end}}
-      {{if not .EventSettings.NetworkSecurityEnabled}}
+      {{else}}
       <div id="matchName" class="text-start" style="width: 45%; padding-left: 1%;"></div>
       {{end}}
       <div id="matchTime" class="text-center" style="width: 10%;"></div>
@@ -51,10 +54,10 @@ Display showing robot connection status in the style of FMS Field Monitor.
 
     <div id="eventStatusRow" class="ds-dependent">
       <div id="leftScore" class="fta-dependent ds-dependent left-score text-start reversible-left"
-        style="width:8%; vertical-align:middle;"></div>
+        style="width: 8%; vertical-align: middle;"></div>
       <div id="cycleTimeMessage" class="text-center ds-dependent" style="width: 46%;"></div>
       <div id="earlyLateMessage" class="text-center ds-dependent" style="width: 38%;"></div>
-      <div id="rightScore" class="right-score ds-dependent text-end fta-dependent reversible-right "
+      <div id="rightScore" class="right-score ds-dependent text-end fta-dependent reversible-right"
         style="width: 8%;"></div>
     </div>
   </body>
@@ -82,13 +85,18 @@ Display showing robot connection status in the style of FMS Field Monitor.
     </div>
   </div>
   
+  <div id="{{.side}}Team{{.position}}Alert" class="fms-station-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span class="fms-station-alert-text"></span>
+  </div>
+
   <div class="fms-team-status">
     <div id="{{.side}}Team{{.position}}Ds" class="fms-status-block">
       <i class="bi bi-controller"></i>
       <div class="fms-status-text">x DS</div>
     </div>
     <div id="{{.side}}Team{{.position}}Radio" class="fms-status-block">
-      <i class="bi bi-wifi-off"></i>
+      <i class="bi bi-reception-4 slashed-icon"></i>
       <div class="fms-status-text">x RADIO</div>
     </div>
     <div id="{{.side}}Team{{.position}}Rio" class="fms-status-block">

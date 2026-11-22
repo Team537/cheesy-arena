@@ -125,7 +125,9 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	eventSettings.ApAddress = r.PostFormValue("apAddress")
 	eventSettings.ApPassword = r.PostFormValue("apPassword")
 	eventSettings.ApChannel, _ = strconv.Atoi(r.PostFormValue("apChannel"))
+	eventSettings.SwitchManagementEnabled = r.PostFormValue("switchManagementEnabled") == "on"
 	eventSettings.SwitchAddress = r.PostFormValue("switchAddress")
+	eventSettings.SwitchUsername = r.PostFormValue("switchUsername")
 	eventSettings.SwitchPassword = r.PostFormValue("switchPassword")
 	eventSettings.SCCManagementEnabled = r.PostFormValue("sccManagementEnabled") == "on"
 	eventSettings.RedSCCAddress = r.PostFormValue("redSCCAddress")
@@ -135,6 +137,7 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	eventSettings.SCCUpCommands = r.PostFormValue("sccUpCommands")
 	eventSettings.SCCDownCommands = r.PostFormValue("sccDownCommands")
 	eventSettings.PlcAddress = r.PostFormValue("plcAddress")
+	eventSettings.FtaReadySwitchRequired = r.PostFormValue("ftaReadySwitchRequired") == "true"
 	eventSettings.LedControllerAddress = r.PostFormValue("ledControllerAddress")
 	eventSettings.LedUniverseMode = r.PostFormValue("ledUniverseMode")
 	eventSettings.AdminPassword = r.PostFormValue("adminPassword")
